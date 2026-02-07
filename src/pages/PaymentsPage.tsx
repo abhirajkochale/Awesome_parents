@@ -253,7 +253,7 @@ export default function PaymentsPage() {
                   name="amount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Amount ($)</FormLabel>
+                      <FormLabel>Amount (₹)</FormLabel>
                       <FormControl>
                         <Input type="number" step="0.01" placeholder="Enter amount" {...field} />
                       </FormControl>
@@ -364,7 +364,7 @@ export default function PaymentsPage() {
                 >
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-semibold">${Number(payment.amount).toFixed(2)}</h3>
+                      <h3 className="font-semibold">₹{Number(payment.amount).toFixed(2)}</h3>
                       {getStatusBadge(payment.status)}
                     </div>
                     <p className="text-sm text-muted-foreground">

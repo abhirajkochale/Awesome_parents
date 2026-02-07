@@ -86,7 +86,7 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-success">
-              ${summary?.totalRevenue.toFixed(2) || '0.00'}
+              ₹{summary?.totalRevenue.toFixed(2) || '0.00'}
             </div>
           </CardContent>
         </Card>
@@ -162,7 +162,7 @@ export default function AdminDashboardPage() {
                 {summary?.recentPayments.map((payment) => (
                   <div key={payment.id} className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
-                      <p className="font-medium">${Number(payment.amount).toFixed(2)}</p>
+                      <p className="font-medium">₹{Number(payment.amount).toFixed(2)}</p>
                       <p className="text-sm text-muted-foreground">
                         {format(new Date(payment.payment_date), 'MMM d, yyyy')}
                       </p>

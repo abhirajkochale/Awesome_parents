@@ -83,7 +83,7 @@ export default function AdminPaymentsPage() {
                   <div className="flex items-start justify-between">
                     <div>
                       <h3 className="font-semibold text-lg">
-                        ${Number(payment.amount).toFixed(2)}
+                        ₹{Number(payment.amount).toFixed(2)}
                       </h3>
                       <p className="text-sm text-muted-foreground">
                         {payment.admission?.student?.full_name} •{' '}
@@ -165,7 +165,7 @@ export default function AdminPaymentsPage() {
           <div className="space-y-4">
             <div className="text-sm space-y-1">
               <p>
-                <span className="font-medium">Amount:</span> $
+                <span className="font-medium">Amount:</span> ₹
                 {Number(selectedPayment?.amount).toFixed(2)}
               </p>
               <p>

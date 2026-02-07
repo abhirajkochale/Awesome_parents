@@ -109,7 +109,7 @@ export default function DashboardPage() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${summary?.totalFees.toFixed(2) || '0.00'}</div>
+            <div className="text-2xl font-bold">₹{summary?.totalFees.toFixed(2) || '0.00'}</div>
           </CardContent>
         </Card>
 
@@ -120,7 +120,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-success">
-              ${summary?.paidAmount.toFixed(2) || '0.00'}
+              ₹{summary?.paidAmount.toFixed(2) || '0.00'}
             </div>
           </CardContent>
         </Card>
@@ -132,7 +132,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-warning">
-              ${summary?.remainingBalance.toFixed(2) || '0.00'}
+              ₹{summary?.remainingBalance.toFixed(2) || '0.00'}
             </div>
           </CardContent>
         </Card>

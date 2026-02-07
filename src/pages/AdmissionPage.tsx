@@ -345,7 +345,7 @@ export default function AdmissionPage() {
                 name="total_fee"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Total Annual Fee ($)</FormLabel>
+                    <FormLabel>Total Annual Fee (₹)</FormLabel>
                     <FormControl>
                       <Input type="number" step="0.01" placeholder="Enter total fee" {...field} />
                     </FormControl>

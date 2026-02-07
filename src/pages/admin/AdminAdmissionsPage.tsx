@@ -123,7 +123,7 @@ export default function AdminAdmissionsPage() {
                       {admission.student?.emergency_contact_name}
                     </div>
                     <div>
-                      <span className="text-muted-foreground">Total Fee:</span> $
+                      <span className="text-muted-foreground">Total Fee:</span> ₹
                       {Number(admission.total_fee).toFixed(2)}
                     </div>
                   </div>
