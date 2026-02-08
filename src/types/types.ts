@@ -9,6 +9,7 @@ export type PaymentStatus = 'pending_upload' | 'under_verification' | 'approved'
 export interface Profile {
   id: string;
   email: string | null;
+  username: string | null;
   full_name: string | null;
   phone: string | null;
   role: UserRole;
@@ -28,6 +29,17 @@ export interface Student {
   emergency_contact_name: string;
   emergency_contact_phone: string;
   emergency_contact_relationship: string;
+  residential_address?: string;
+  correspondence_address?: string;
+  religion?: string;
+  caste?: string;
+  mother_phone?: string;
+  mother_email?: string;
+  father_phone?: string;
+  father_email?: string;
+  preferred_whatsapp?: string;
+  previous_school?: string;
+  language_known?: string;
   medical_conditions: string | null;
   allergies: string | null;
   created_at: string;
@@ -41,6 +53,7 @@ export interface Admission {
   admission_date: string;
   status: AdmissionStatus;
   total_fee: number;
+  uploaded_files?: Record<string, string>;
   notes: string | null;
   created_at: string;
   updated_at: string;
@@ -112,11 +125,20 @@ export interface AdmissionFormData {
   emergency_contact_name: string;
   emergency_contact_phone: string;
   emergency_contact_relationship: string;
-  // Parent info
-  parent_full_name: string;
-  parent_phone: string;
+  // Parent & Address info
+  residential_address: string;
+  correspondence_address: string;
+  religion?: string;
+  caste?: string;
+  mother_phone: string;
+  mother_email?: string;
+  father_phone: string;
+  father_email?: string;
+  preferred_whatsapp: string;
+  previous_school?: string;
   // Fee info
   total_fee: number;
+  uploaded_files?: Record<string, string>;
 }
 
 export interface PaymentFormData {
@@ -142,7 +164,27 @@ export interface AnnouncementFormData {
   announcement_date: string;
 }
 
+// Help & Feedback types
+export interface HelpQuery {
+  id: string;
+  parent_id: string;
+  subject: string;
+  message: string;
+  attachment_url: string | null;
+  status: 'open' | 'replied' | 'closed';
+  created_at: string;
+  updated_at: string;
+  parent?: Profile;
+}
+
+export interface QueryFormData {
+  subject: string;
+  message: string;
+  attachment_file?: File;
+}
+
 // Dashboard summary types
+
 export interface ParentDashboardSummary {
   students: StudentWithAdmission[];
   totalFees: number;
@@ -159,4 +201,5 @@ export interface AdminDashboardSummary {
   totalRevenue: number;
   recentAdmissions: AdmissionWithStudent[];
   recentPayments: PaymentWithAdmission[];
+  totalQueries?: number;
 }

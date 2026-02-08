@@ -6,7 +6,7 @@ import { eventApi, storageApi } from '@/db/api';
 import type { Event } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -27,7 +27,6 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function AdminEventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
@@ -48,13 +47,10 @@ export default function AdminEventsPage() {
 
   const loadEvents = async () => {
     try {
-      setLoading(true);
       const data = await eventApi.getAllEvents();
       setEvents(data);
     } catch (err) {
       console.error(err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -135,6 +131,9 @@ export default function AdminEventsPage() {
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Create New Event</DialogTitle>
+              <DialogDescription>
+                Fill out the form below to create a new event.
+              </DialogDescription>
             </DialogHeader>
 
             <Form {...form}>
@@ -158,7 +157,7 @@ export default function AdminEventsPage() {
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description</FormLabel>
+                      <FormLabel>Event Description</FormLabel>
                       <FormControl>
                         <Textarea placeholder="Enter event description" {...field} />
                       </FormControl>

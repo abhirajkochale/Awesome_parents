@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { dashboardApi } from '@/db/api';
-import type { AdminDashboardSummary } from '@/types';
+import { dashboardApi, admissionApi, paymentApi } from '@/db/api';
+import type { AdminDashboardSummary, AdmissionWithStudent } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { Users, FileText, DollarSign, AlertCircle, ArrowRight } from 'lucide-react';
+import { Calendar, CheckCircle, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function AdminDashboardPage() {
   const [summary, setSummary] = useState<AdminDashboardSummary | null>(null);
+  const [admissions, setAdmissions] = useState<AdmissionWithStudent[]>([]);
+  const [payments, setPayments] = useState<any[]>([]); // Using any for joined payment data simplification
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,13 +22,29 @@ export default function AdminDashboardPage() {
   const loadDashboard = async () => {
     try {
       setLoading(true);
-      const data = await dashboardApi.getAdminDashboard();
-      setSummary(data);
+      const [dashboardData, admissionsData, paymentsData] = await Promise.all([
+        dashboardApi.getAdminDashboard(),
+        admissionApi.getAllAdmissions(),
+        paymentApi.getAllPayments(),
+      ]);
+
+      setSummary(dashboardData);
+      setAdmissions(admissionsData);
+      setPayments(paymentsData);
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Helper to calculate fees for a specific admission
+  const getFeeDetails = (admissionId: string, totalFee: number) => {
+    const admissionPayments = payments.filter(p => p.admission_id === admissionId && p.status === 'approved');
+    const paidAmount = admissionPayments.reduce((sum, p) => sum + Number(p.amount), 0);
+    const remaining = totalFee - paidAmount;
+    const status = remaining <= 0 ? 'Paid' : paidAmount > 0 ? 'Partial' : 'Pending';
+    return { paidAmount, remaining, status };
   };
 
   if (loading) {
@@ -43,148 +61,148 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-        <p className="text-muted-foreground">Overview of school operations</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Student Dashboard</h1>
+          <p className="text-muted-foreground">Detailed view of all student admissions and fees</p>
+        </div>
+        <div className="flex gap-2">
+          <Button asChild variant="outline">
+            <Link to="/admin/events">
+              <Calendar className="mr-2 h-4 w-4" />
+              Manage Events
+            </Link>
+          </Button>
+          <Button asChild>
+            <Link to="/admin/admissions">
+              <CheckCircle className="mr-2 h-4 w-4" />
+              Review Admissions
+            </Link>
+          </Button>
+        </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* Summary Cards */}
+      <div className="grid gap-4 md:grid-cols-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Students</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
+          <CardHeader className="py-4">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Students</CardTitle>
             <div className="text-2xl font-bold">{summary?.totalStudents || 0}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Pending Admissions</CardTitle>
-            <FileText className="h-4 w-4 text-warning" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-warning">{summary?.pendingAdmissions || 0}</div>
-          </CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Pending Payments</CardTitle>
-            <AlertCircle className="h-4 w-4 text-warning" />
+          <CardHeader className="py-4">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Pending Admissions</CardTitle>
+            <div className="text-2xl font-bold text-amber-600">{summary?.pendingAdmissions || 0}</div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-warning">{summary?.pendingPayments || 0}</div>
-          </CardContent>
         </Card>
-
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-success" />
+          <CardHeader className="py-4">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Pending Payments</CardTitle>
+            <div className="text-2xl font-bold text-amber-600">{summary?.pendingPayments || 0}</div>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-success">
-              ₹{summary?.totalRevenue.toFixed(2) || '0.00'}
-            </div>
-          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="py-4">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Revenue</CardTitle>
+            <div className="text-2xl font-bold text-green-600">₹{summary?.totalRevenue.toLocaleString('en-IN', { maximumFractionDigits: 0 }) || 0}</div>
+          </CardHeader>
         </Card>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Recent Admissions</CardTitle>
-                <CardDescription>Latest admission applications</CardDescription>
-              </div>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/admin/admissions">
-                  View All
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
+      {/* Main Student List Table */}
+      <Card className="h-full">
+        <CardHeader>
+          <CardTitle>Student Admissions & Fee Details</CardTitle>
+          <CardDescription>Comprehensive list of students who have filled the admission form</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {admissions.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground">
+              <FileText className="h-12 w-12 mx-auto mb-3 opacity-20" />
+              <p>No student admissions found</p>
             </div>
-          </CardHeader>
-          <CardContent>
-            {summary?.recentAdmissions.length === 0 ? (
-              <p className="text-center text-muted-foreground py-4">No recent admissions</p>
-            ) : (
-              <div className="space-y-3">
-                {summary?.recentAdmissions.map((admission) => (
-                  <div key={admission.id} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
-                      <p className="font-medium">{admission.student?.full_name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {format(new Date(admission.created_at), 'MMM d, yyyy')}
-                      </p>
-                    </div>
-                    <Badge
-                      variant={
-                        admission.status === 'approved'
-                          ? 'default'
-                          : admission.status === 'rejected'
-                            ? 'destructive'
-                            : 'secondary'
-                      }
-                    >
-                      {admission.status}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          ) : (
+            <div className="rounded-md border">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-muted/50 text-muted-foreground font-medium">
+                  <tr>
+                    <th className="p-4">Student Name</th>
+                    <th className="p-4">Class</th>
+                    <th className="p-4">Admission Status</th>
+                    <th className="p-4">Fees Paid</th>
+                    <th className="p-4">Fee Status</th>
+                    <th className="p-4 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {admissions.map((admission) => {
+                    const { paidAmount, status: feeStatus } = getFeeDetails(admission.id, admission.total_fee);
+                    const feeProgress = Math.min(100, Math.round((paidAmount / admission.total_fee) * 100));
 
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle>Recent Payments</CardTitle>
-                <CardDescription>Latest payment submissions</CardDescription>
-              </div>
-              <Button variant="ghost" size="sm" asChild>
-                <Link to="/admin/payments">
-                  View All
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
+                    return (
+                      <tr key={admission.id} className="hover:bg-muted/30 transition-colors">
+                        <td className="p-4">
+                          <div className="flex items-center gap-3">
+                            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
+                              {admission.student?.full_name?.substring(0, 2).toUpperCase()}
+                            </div>
+                            <div>
+                              <p className="font-medium">{admission.student?.full_name}</p>
+                              <p className="text-xs text-muted-foreground">{format(new Date(admission.created_at), 'MMM d, yyyy')}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <Badge variant="outline">{admission.student?.class}</Badge>
+                        </td>
+                        <td className="p-4">
+                          <Badge
+                            variant={
+                              admission.status === 'approved' ? 'default' :
+                                admission.status === 'rejected' ? 'destructive' : 'secondary'
+                            }
+                            className="capitalize"
+                          >
+                            {admission.status}
+                          </Badge>
+                        </td>
+                        <td className="p-4">
+                          <div className="space-y-1">
+                            <div className="flex justify-between text-xs mb-1">
+                              <span>₹{paidAmount.toLocaleString()}</span>
+                              <span className="text-muted-foreground">/ ₹{admission.total_fee.toLocaleString()}</span>
+                            </div>
+                            <div className="h-1.5 w-24 bg-secondary rounded-full overflow-hidden">
+                              <div
+                                className={`h-full ${feeStatus === 'Paid' ? 'bg-green-500' : 'bg-primary'}`}
+                                style={{ width: `${feeProgress}%` }}
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                                            ${feeStatus === 'Paid' ? 'bg-green-100 text-green-700' :
+                              feeStatus === 'Partial' ? 'bg-blue-100 text-blue-700' :
+                                'bg-orange-100 text-orange-700'}`}>
+                            {feeStatus}
+                          </span>
+                        </td>
+                        <td className="p-4 text-right">
+                          <Button variant="ghost" size="sm" asChild>
+                            <Link to="/admin/admissions">View</Link>
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
-          </CardHeader>
-          <CardContent>
-            {summary?.recentPayments.length === 0 ? (
-              <p className="text-center text-muted-foreground py-4">No recent payments</p>
-            ) : (
-              <div className="space-y-3">
-                {summary?.recentPayments.map((payment) => (
-                  <div key={payment.id} className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
-                      <p className="font-medium">₹{Number(payment.amount).toFixed(2)}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {format(new Date(payment.payment_date), 'MMM d, yyyy')}
-                      </p>
-                    </div>
-                    <Badge
-                      variant={
-                        payment.status === 'approved'
-                          ? 'default'
-                          : payment.status === 'rejected'
-                            ? 'destructive'
-                            : 'secondary'
-                      }
-                    >
-                      {payment.status}
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -20,7 +20,6 @@ import {
   Settings,
   LogOut,
   Menu,
-  GraduationCap,
   Users,
   CheckCircle,
   DollarSign,
@@ -101,15 +100,9 @@ export default function AppLayout({ children }: AppLayoutProps) {
       {/* Desktop Sidebar */}
       <aside className="hidden lg:block w-64 border-r bg-card shrink-0">
         <div className="flex flex-col h-full">
-          <div className="p-6 border-b">
-            <Link to="/" className="flex items-center gap-2">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <GraduationCap className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h1 className="font-bold text-lg">Preschool</h1>
-                <p className="text-xs text-muted-foreground">Parent Portal</p>
-              </div>
+          <div className="p-4 border-b flex justify-center">
+            <Link to="/" className="flex items-center w-full">
+              <img src="/AwesomeKids_logo.jpeg" alt="AwesomeKids" className="w-full h-auto object-contain" />
             </Link>
           </div>
 
@@ -140,11 +133,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
         {/* Mobile Header */}
         <header className="lg:hidden sticky top-0 z-50 w-full border-b bg-card">
           <div className="flex items-center justify-between p-4">
-            <Link to="/" className="flex items-center gap-2">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <GraduationCap className="h-5 w-5 text-primary" />
-              </div>
-              <span className="font-bold">Preschool Portal</span>
+            <Link to="/" className="flex items-center">
+              <img src="/AwesomeKids_logo.jpeg" alt="AwesomeKids" className="h-12 w-auto object-contain" />
             </Link>
 
             <div className="flex items-center gap-2">
@@ -182,17 +172,15 @@ export default function AppLayout({ children }: AppLayoutProps) {
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="left" className="w-64 p-0">
-                  <div className="p-6 border-b">
-                    <Link to="/" className="flex items-center gap-2">
-                      <div className="p-2 bg-primary/10 rounded-lg">
-                        <GraduationCap className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <h1 className="font-bold text-lg">Preschool</h1>
-                        <p className="text-xs text-muted-foreground">Parent Portal</p>
-                      </div>
+                  <div className="p-4 border-b flex justify-center">
+                    <Link to="/" className="flex items-center w-full px-4">
+                      <img src="/AwesomeKids_logo.jpeg" alt="AwesomeKids" className="w-full h-auto object-contain" />
                     </Link>
                   </div>
+                  <SheetHeader className="sr-only">
+                    <SheetTitle>Navigation Menu</SheetTitle>
+                    <SheetDescription>Mobile navigation links for Parent Portal</SheetDescription>
+                  </SheetHeader>
                   <div className="py-4">
                     <NavLinks mobile />
                   </div>

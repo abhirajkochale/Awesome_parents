@@ -7,13 +7,26 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Shield, User } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { Shield, User, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { user: currentUser } = useAuth();
 
   useEffect(() => {
     loadUsers();
@@ -44,6 +57,24 @@ export default function AdminUsersPage() {
       toast({
         title: 'Error',
         description: 'Failed to update user role',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    try {
+      await profileApi.deleteProfile(userId);
+      toast({
+        title: 'Success',
+        description: 'User deleted successfully',
+      });
+      loadUsers();
+    } catch (err) {
+      console.error(err);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete user',
         variant: 'destructive',
       });
     }
@@ -89,7 +120,7 @@ export default function AdminUsersPage() {
                         <p className="text-sm text-muted-foreground">Phone: {user.phone}</p>
                       )}
                       <p className="text-xs text-muted-foreground mt-1">
-                        Joined: {format(new Date(user.created_at), 'MMM d, yyyy')}
+                        Joined: {user.created_at ? format(new Date(user.created_at), 'MMM d, yyyy') : 'Recently'}
                       </p>
                     </div>
                   </div>
@@ -103,6 +134,7 @@ export default function AdminUsersPage() {
                       onValueChange={(value: 'parent' | 'admin') =>
                         handleRoleChange(user.id, value)
                       }
+                      disabled={user.id === currentUser?.id}
                     >
                       <SelectTrigger className="w-32">
                         <SelectValue />
@@ -112,6 +144,37 @@ export default function AdminUsersPage() {
                         <SelectItem value="admin">Admin</SelectItem>
                       </SelectContent>
                     </Select>
+
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                          disabled={user.id === currentUser?.id}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the account
+                            for {user.full_name || user.email} and remove their data from our servers.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDeleteUser(user.id)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div>
               ))}

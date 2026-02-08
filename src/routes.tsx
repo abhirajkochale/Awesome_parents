@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
-import AppLayout from '@/components/layouts/AppLayout';
+import ParentLayout from '@/components/layouts/ParentLayout';
+import AdminLayout from '@/components/layouts/AdminLayout';
 
 // Pages
 import LoginPage from '@/pages/LoginPage';
@@ -16,6 +17,8 @@ import AdminPaymentsPage from '@/pages/admin/AdminPaymentsPage';
 import AdminEventsPage from '@/pages/admin/AdminEventsPage';
 import AdminAnnouncementsPage from '@/pages/admin/AdminAnnouncementsPage';
 import AdminUsersPage from '@/pages/admin/AdminUsersPage';
+import SupportPage from '@/pages/SupportPage';
+import AdminQueriesPage from '@/pages/admin/AdminQueriesPage';
 
 import NotFound from '@/pages/NotFound';
 
@@ -37,99 +40,117 @@ const routes: RouteConfig[] = [
     name: 'Dashboard',
     path: '/',
     element: (
-      <AppLayout>
+      <ParentLayout>
         <DashboardPage />
-      </AppLayout>
+      </ParentLayout>
     ),
   },
   {
     name: 'Admission',
     path: '/admission',
     element: (
-      <AppLayout>
+      <ParentLayout>
         <AdmissionPage />
-      </AppLayout>
+      </ParentLayout>
     ),
   },
   {
     name: 'Payments',
     path: '/payments',
     element: (
-      <AppLayout>
+      <ParentLayout>
         <PaymentsPage />
-      </AppLayout>
+      </ParentLayout>
     ),
   },
   {
     name: 'Events',
     path: '/events',
     element: (
-      <AppLayout>
+      <ParentLayout>
         <EventsPage />
-      </AppLayout>
+      </ParentLayout>
     ),
   },
   {
     name: 'Announcements',
     path: '/announcements',
     element: (
-      <AppLayout>
+      <ParentLayout>
         <AnnouncementsPage />
-      </AppLayout>
+      </ParentLayout>
+    ),
+  },
+  {
+    name: 'Support',
+    path: '/support',
+    element: (
+      <ParentLayout>
+        <SupportPage />
+      </ParentLayout>
     ),
   },
   {
     name: 'Admin Dashboard',
     path: '/admin',
     element: (
-      <AppLayout>
+      <AdminLayout>
         <AdminDashboardPage />
-      </AppLayout>
+      </AdminLayout>
     ),
   },
   {
     name: 'Admin Admissions',
     path: '/admin/admissions',
     element: (
-      <AppLayout>
+      <AdminLayout>
         <AdminAdmissionsPage />
-      </AppLayout>
+      </AdminLayout>
     ),
   },
   {
     name: 'Admin Payments',
     path: '/admin/payments',
     element: (
-      <AppLayout>
+      <AdminLayout>
         <AdminPaymentsPage />
-      </AppLayout>
+      </AdminLayout>
     ),
   },
   {
     name: 'Admin Events',
     path: '/admin/events',
     element: (
-      <AppLayout>
+      <AdminLayout>
         <AdminEventsPage />
-      </AppLayout>
+      </AdminLayout>
     ),
   },
   {
     name: 'Admin Announcements',
     path: '/admin/announcements',
     element: (
-      <AppLayout>
+      <AdminLayout>
         <AdminAnnouncementsPage />
-      </AppLayout>
+      </AdminLayout>
     ),
   },
   {
     name: 'Admin Users',
     path: '/admin/users',
     element: (
-      <AppLayout>
+      <AdminLayout>
         <AdminUsersPage />
-      </AppLayout>
+      </AdminLayout>
+    ),
+  },
+  {
+    name: 'Admin Queries',
+    path: '/admin/queries',
+    element: (
+      <AdminLayout>
+        <AdminQueriesPage />
+      </AdminLayout>
     ),
   },
   {

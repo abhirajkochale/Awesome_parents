@@ -6,7 +6,7 @@ import { announcementApi } from '@/db/api';
 import type { Announcement } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -26,7 +26,6 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function AdminAnnouncementsPage() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
@@ -47,13 +46,10 @@ export default function AdminAnnouncementsPage() {
 
   const loadAnnouncements = async () => {
     try {
-      setLoading(true);
       const data = await announcementApi.getAllAnnouncements();
       setAnnouncements(data);
     } catch (err) {
       console.error(err);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -119,6 +115,9 @@ export default function AdminAnnouncementsPage() {
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Create New Announcement</DialogTitle>
+              <DialogDescription>
+                Fill out the form below to create a new announcement.
+              </DialogDescription>
             </DialogHeader>
 
             <Form {...form}>

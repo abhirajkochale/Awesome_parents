@@ -108,3 +108,62 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* Global typography and layout refinements for better UX */
+@layer base {
+  html { font-size: 16px; }
+
+  body {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1 {
+    @apply text-3xl md:text-4xl font-bold leading-tight;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  h2 {
+    @apply text-2xl md:text-3xl font-semibold leading-snug;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  h3 {
+    @apply text-lg md:text-xl font-semibold;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    @apply text-sm md:text-base text-muted-foreground;
+    margin-bottom: 0.75rem;
+  }
+
+  /* Container rhythm for comfortable reading width */
+  .container {
+    max-width: 1080px;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  /* Slightly increase card padding and consistent spacing */
+  .card, .Card, .card-root {
+    padding: 1rem 1.25rem;
+  }
+
+  /* Make action buttons more prominent and comfortable to tap */
+  button {
+    min-height: 44px;
+    padding-left: 0.875rem;
+    padding-right: 0.875rem;
+  }
+
+  /* Improve form field spacing */
+  input, textarea, select {
+    padding: 0.5rem 0.75rem;
+  }
+}

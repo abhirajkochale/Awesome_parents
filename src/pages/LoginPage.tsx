@@ -9,7 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { GraduationCap } from 'lucide-react';
 
 export default function LoginPage() {
-  const { signInWithUsername, signUpWithUsername } = useAuth();
+  const { login, signup } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -20,10 +20,10 @@ export default function LoginPage() {
     setError('');
 
     const formData = new FormData(e.currentTarget);
-    const username = formData.get('username') as string;
+    const email = formData.get('email') as string;
     const password = formData.get('password') as string;
 
-    const { error } = await signInWithUsername(username, password);
+    const { error } = await login(email, password);
 
     if (error) {
       setError(error.message || 'Login failed. Please check your credentials.');
@@ -39,6 +39,7 @@ export default function LoginPage() {
     setSuccess('');
 
     const formData = new FormData(e.currentTarget);
+    const email = formData.get('email') as string;
     const username = formData.get('username') as string;
     const password = formData.get('password') as string;
     const confirmPassword = formData.get('confirmPassword') as string;
@@ -55,7 +56,7 @@ export default function LoginPage() {
       return;
     }
 
-    const { error } = await signUpWithUsername(username, password);
+    const { error } = await signup(email, password, username);
 
     if (error) {
       setError(error.message || 'Signup failed. Please try again.');
@@ -96,12 +97,12 @@ export default function LoginPage() {
                 )}
 
                 <div className="space-y-2">
-                  <Label htmlFor="login-username">Username</Label>
+                  <Label htmlFor="login-email">Email</Label>
                   <Input
-                    id="login-username"
-                    name="username"
-                    type="text"
-                    placeholder="Enter your username"
+                    id="login-email"
+                    name="email"
+                    type="email"
+                    placeholder="Enter your email"
                     required
                     disabled={isLoading}
                   />
@@ -138,6 +139,18 @@ export default function LoginPage() {
                     <AlertDescription>{success}</AlertDescription>
                   </Alert>
                 )}
+
+                <div className="space-y-2">
+                  <Label htmlFor="signup-email">Email</Label>
+                  <Input
+                    id="signup-email"
+                    name="email"
+                    type="email"
+                    placeholder="Enter your email"
+                    required
+                    disabled={isLoading}
+                  />
+                </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="signup-username">Username</Label>
@@ -183,10 +196,6 @@ export default function LoginPage() {
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? 'Creating account...' : 'Sign Up'}
                 </Button>
-
-                <p className="text-xs text-center text-muted-foreground">
-                  First user will be assigned as admin
-                </p>
               </form>
             </TabsContent>
           </Tabs>

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { CheckCircle, XCircle, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
@@ -123,8 +123,8 @@ export default function AdminPaymentsPage() {
                       </Button>
                     )}
 
-                    {payment.status === 'under_verification' && (
-                      <>
+                    {(payment.status === 'under_verification' || payment.status === 'pending_upload') && (
+                      <div className="flex gap-2">
                         <Button
                           size="sm"
                           onClick={() => {
@@ -146,7 +146,7 @@ export default function AdminPaymentsPage() {
                           <XCircle className="mr-2 h-4 w-4" />
                           Reject
                         </Button>
-                      </>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -160,12 +160,14 @@ export default function AdminPaymentsPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Verify Payment</DialogTitle>
+            <DialogDescription>
+              Please verify the payment details below.
+            </DialogDescription>
           </DialogHeader>
-
           <div className="space-y-4">
             <div className="text-sm space-y-1">
               <p>
-                <span className="font-medium">Amount:</span> ₹
+                <span className="font-medium">Amount:</span>
                 {Number(selectedPayment?.amount).toFixed(2)}
               </p>
               <p>

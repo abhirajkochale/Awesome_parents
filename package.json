@@ -3,7 +3,9 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "echo 'Do not use this command, only use lint to check'",
+    "dev": "vite",
+    "verify:db": "npx tsx verify_tables.ts",
+    "test:db": "node test-db-connection.cjs",
     "build": "echo 'Do not use this command, only use lint to check'",
     "lint": "tsgo -p tsconfig.check.json; npx biome lint; .rules/check.sh;npx tailwindcss -i ./src/index.css -o /dev/null 2>&1 | grep -E '^(CssSyntaxError|Error):.*' || true;.rules/testBuild.sh"
   },
@@ -60,6 +62,7 @@
     "react-resizable-panels": "^2.1.8",
     "react-router": "^7.9.5",
     "react-router-dom": "^7.9.5",
+    "react-to-print": "^3.2.0",
     "recharts": "^2.15.3",
     "sonner": "^2.0.7",
     "streamdown": "^1.4.0",

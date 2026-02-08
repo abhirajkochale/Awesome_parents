@@ -14,13 +14,15 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { CheckCircle, XCircle } from 'lucide-react';
+import { AdmissionDetailsDialog } from '@/components/admin/AdmissionDetailsDialog';
+import { CheckCircle, XCircle, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function AdminAdmissionsPage() {
   const [admissions, setAdmissions] = useState<AdmissionWithStudent[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedAdmission, setSelectedAdmission] = useState<AdmissionWithStudent | null>(null);
+  const [selectedAdmissionForDetails, setSelectedAdmissionForDetails] = useState<AdmissionWithStudent | null>(null);
   const [notes, setNotes] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
@@ -146,6 +148,15 @@ export default function AdminAdmissionsPage() {
                       </Button>
                       <Button
                         size="sm"
+                        variant="outline"
+                        onClick={() => setSelectedAdmissionForDetails(admission)}
+                        className="gap-2"
+                      >
+                        <Eye className="h-4 w-4" />
+                        View Full Details
+                      </Button>
+                      <Button
+                        size="sm"
                         variant="destructive"
                         onClick={() => {
                           setSelectedAdmission(admission);
@@ -165,6 +176,12 @@ export default function AdminAdmissionsPage() {
         </CardContent>
       </Card>
 
+      <AdmissionDetailsDialog
+        admission={selectedAdmissionForDetails}
+        open={!!selectedAdmissionForDetails}
+        onOpenChange={(open) => !open && setSelectedAdmissionForDetails(null)}
+      />
+
       <Dialog open={!!selectedAdmission} onOpenChange={() => setSelectedAdmission(null)}>
         <DialogContent>
           <DialogHeader>
@@ -173,7 +190,6 @@ export default function AdminAdmissionsPage() {
               {selectedAdmission?.student?.full_name} - {selectedAdmission?.student?.class}
             </DialogDescription>
           </DialogHeader>
-
           <div className="space-y-4">
             <div>
               <label className="text-sm font-medium">Notes (Optional)</label>
