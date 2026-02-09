@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { dashboardApi, admissionApi, paymentApi } from '@/db/api';
+import { dashboardApi, admissionApi, paymentApi, studentApi } from '@/db/api';
 import type { AdminDashboardSummary, AdmissionWithStudent } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,6 +22,15 @@ export default function AdminDashboardPage() {
   const loadDashboard = async () => {
     try {
       setLoading(true);
+
+      // Auto-cleanup orphaned students to ensure correct counts
+      try {
+        await studentApi.cleanupOrphanedStudents();
+      } catch (err) {
+        console.error("Failed to cleanup orphans:", err);
+        // Continue loading dashboard even if cleanup fails
+      }
+
       const [dashboardData, admissionsData, paymentsData] = await Promise.all([
         dashboardApi.getAdminDashboard(),
         admissionApi.getAllAdmissions(),

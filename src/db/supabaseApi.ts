@@ -179,6 +179,31 @@ export const supabaseApi = {
         return data;
     },
 
+    cleanupOrphanedStudents: async (): Promise<void> => {
+        // 1. Get all students
+        const { data: students, error: sErr } = await supabase.from('students').select('id');
+        if (sErr) throw sErr;
+        if (!students) return;
+
+        // 2. Get all admissions
+        const { data: admissions, error: aErr } = await supabase.from('admissions').select('student_id');
+        if (aErr) throw aErr;
+        if (!admissions) return;
+
+        const admittedIds = new Set(admissions.map(a => a.student_id));
+        const orphans = students.filter(s => !admittedIds.has(s.id)).map(s => s.id);
+
+        // 3. Delete orphans
+        if (orphans.length > 0) {
+            const { error } = await supabase
+                .from('students')
+                .delete()
+                .in('id', orphans);
+
+            if (error) throw error;
+        }
+    },
+
     // Admissions
     getMyAdmissions: async (): Promise<AdmissionWithStudent[]> => {
         const userId = await getCurrentUserId();
@@ -327,12 +352,38 @@ export const supabaseApi = {
     },
 
     deleteAdmission: async (id: string): Promise<void> => {
+        // 1. Get the student_id for this admission so we can clean up the student record
+        const { data: admission, error: fetchError } = await supabase
+            .from('admissions')
+            .select('student_id')
+            .eq('id', id)
+            .single();
+
+        if (fetchError) {
+            console.error("Error fetching admission details for deletion:", fetchError);
+            throw fetchError;
+        }
+
+        // 2. Delete the admission
         const { error } = await supabase
             .from('admissions')
             .delete()
             .eq('id', id);
 
         if (error) throw error;
+
+        // 3. Delete the associated student
+        if (admission && admission.student_id) {
+            const { error: studentError } = await supabase
+                .from('students')
+                .delete()
+                .eq('id', admission.student_id);
+
+            if (studentError) {
+                console.error("Failed to delete associated student:", studentError);
+                // We log but don't throw, as the primary action (deleting admission) succeeded
+            }
+        }
     },
 
     // Payments

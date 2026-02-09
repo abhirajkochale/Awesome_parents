@@ -13,6 +13,7 @@ export const studentApi = {
   getAllStudents: supabaseApi.getAllStudents,
   createStudent: supabaseApi.createStudent,
   updateStudent: supabaseApi.updateStudent,
+  cleanupOrphanedStudents: supabaseApi.cleanupOrphanedStudents,
 };
 
 export const admissionApi = {
