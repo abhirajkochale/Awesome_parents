@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
+
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Upload, CheckCircle } from 'lucide-react';
@@ -990,12 +990,14 @@ export default function AdmissionPage() {
                     render={({ field }) => (
                       <div className="flex flex-row items-center space-x-3">
                         <FormControl>
-                          <Checkbox
+                          <input
+                            type="checkbox"
                             id="signatures-confirm"
+                            className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
                             checked={field.value}
-                            onCheckedChange={(checked) => {
-                              field.onChange(checked);
-                              if (checked) {
+                            onChange={(e) => {
+                              field.onChange(e.target.checked);
+                              if (e.target.checked) {
                                 toast({
                                   title: 'Signatures Acknowledged',
                                   description: 'You have confirmed both signatures.',
