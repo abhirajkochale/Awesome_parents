@@ -133,7 +133,7 @@ export default function AdmissionPage() {
       signatures_confirmed: false,
 
       // Academic Year
-      academic_year: '2024-2025',
+      academic_year: '2026-2027',
     },
   });
 
