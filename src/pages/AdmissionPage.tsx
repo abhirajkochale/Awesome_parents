@@ -216,10 +216,10 @@ export default function AdmissionPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-4xl font-bold">Admission Form</h1>
-        <p className="text-muted-foreground mt-2">
+    <div className="max-w-5xl mx-auto space-y-8 pb-12">
+      <div className="space-y-3">
+        <h1 className="text-4xl font-bold tracking-tight">Admission Form</h1>
+        <p className="text-base text-muted-foreground">
           Awesome Kids International Preschool - Complete admission application
         </p>
       </div>
@@ -231,13 +231,13 @@ export default function AdmissionPage() {
       )}
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           {/* Student Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Information of Child</CardTitle>
+          <Card className="shadow-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-2xl font-semibold">Information of Child</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
               {/* Photos Upload Section */}
               <div className="grid md:grid-cols-3 gap-4 mb-6 pb-6 border-b">
                 <div
@@ -567,11 +567,11 @@ export default function AdmissionPage() {
           </Card>
 
           {/* Parents Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Parents Information</CardTitle>
+          <Card className="shadow-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-2xl font-semibold">Parents Information</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <h3 className="font-semibold mb-4 flex items-center gap-2">
@@ -659,11 +659,11 @@ export default function AdmissionPage() {
           </Card>
 
           {/* Emergency Contact */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Emergency Contact</CardTitle>
+          <Card className="shadow-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-2xl font-semibold">Emergency Contact</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-5">
               <FormField
                 control={form.control}
                 name="emergency_contact_number"
@@ -707,9 +707,9 @@ export default function AdmissionPage() {
           </Card>
 
           {/* Previous School */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Previous Education</CardTitle>
+          <Card className="shadow-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-2xl font-semibold">Previous Education</CardTitle>
             </CardHeader>
             <CardContent>
               <FormField
@@ -728,10 +728,10 @@ export default function AdmissionPage() {
           </Card>
 
           {/* Required Documents Upload */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Upload Required Documents</CardTitle>
-              <CardDescription>Upload each document separately (PDF, JPG, PNG)</CardDescription>
+          <Card className="shadow-sm">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-2xl font-semibold">Upload Required Documents</CardTitle>
+              <CardDescription className="text-sm">Upload each document separately (PDF, JPG, PNG)</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
