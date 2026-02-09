@@ -137,9 +137,9 @@ export const supabaseApi = {
         if (admissionsError) throw admissionsError;
 
         // Merge
-        return students.map(student => ({
+        return students.map((student: Student) => ({
             ...student,
-            admission: admissions?.find(a => a.student_id === student.id),
+            admission: admissions?.find((a: Admission) => a.student_id === student.id),
         }));
     },
 
@@ -151,9 +151,9 @@ export const supabaseApi = {
         const { data: admissions, error: admissionsError } = await supabase.from('admissions').select('*');
         if (admissionsError) throw admissionsError;
 
-        return students.map(student => ({
+        return students.map((student: Student) => ({
             ...student,
-            admission: admissions?.find(a => a.student_id === student.id),
+            admission: admissions?.find((a: Admission) => a.student_id === student.id),
         }));
     },
 
@@ -189,8 +189,8 @@ export const supabaseApi = {
         if (aErr) throw aErr;
         if (!admissions) return;
 
-        const admittedIds = new Set(admissions.map(a => a.student_id));
-        const orphans = students.filter(s => !admittedIds.has(s.id)).map(s => s.id);
+        const admittedIds = new Set(admissions.map((a: Admission) => a.student_id));
+        const orphans = students.filter((s: { id: string }) => !admittedIds.has(s.id)).map((s: { id: string }) => s.id);
 
         // 3. Delete orphans
         if (orphans.length > 0) {
@@ -545,7 +545,7 @@ export const supabaseApi = {
 
         if (payError) throw payError;
 
-        const paidAmount = payments.reduce((sum, p) => sum + Number(p.amount), 0);
+        const paidAmount = payments.reduce((sum: number, p: { amount: number }) => sum + Number(p.amount), 0);
         const totalFee = Number(admission.total_fee);
 
         return {
@@ -706,10 +706,10 @@ export const supabaseApi = {
         const upcomingEvents = await supabaseApi.getUpcomingEvents();
         const recentAnnouncements = await supabaseApi.getRecentAnnouncements(3);
 
-        const totalFees = students.reduce((sum, s) => sum + Number(s.admission?.total_fee || 0), 0);
+        const totalFees = students.reduce((sum: number, s: StudentWithAdmission) => sum + Number(s.admission?.total_fee || 0), 0);
         const paidAmount = payments
-            .filter(p => p.status === 'approved')
-            .reduce((sum, p) => sum + Number(p.amount), 0);
+            .filter((p: PaymentWithAdmission) => p.status === 'approved')
+            .reduce((sum: number, p: PaymentWithAdmission) => sum + Number(p.amount), 0);
 
 
         return {
@@ -752,7 +752,7 @@ export const supabaseApi = {
 
         if (err1 || err2 || err3 || err4 || err7) throw new Error("Failed to fetch dashboard stats");
 
-        const totalRevenue = (approvedPayments || []).reduce((sum, p) => sum + Number(p.amount), 0);
+        const totalRevenue = (approvedPayments || []).reduce((sum: number, p: { amount: number }) => sum + Number(p.amount), 0);
 
         // Recent Admissions
         const { data: recentAdmissionsRaw, error: err5 } = await supabase
