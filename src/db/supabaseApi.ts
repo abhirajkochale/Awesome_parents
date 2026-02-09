@@ -314,6 +314,27 @@ export const supabaseApi = {
         return data;
     },
 
+    updateAdmission: async (id: string, updates: Partial<Admission>): Promise<Admission> => {
+        const { data, error } = await supabase
+            .from('admissions')
+            .update(updates)
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    },
+
+    deleteAdmission: async (id: string): Promise<void> => {
+        const { error } = await supabase
+            .from('admissions')
+            .delete()
+            .eq('id', id);
+
+        if (error) throw error;
+    },
+
     // Payments
     getMyPayments: async (): Promise<PaymentWithAdmission[]> => {
         const userId = await getCurrentUserId();

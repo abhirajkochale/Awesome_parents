@@ -15,7 +15,8 @@ import {
 } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { AdmissionDetailsDialog } from '@/components/admin/AdmissionDetailsDialog';
-import { CheckCircle, XCircle, Eye } from 'lucide-react';
+import { AdminEditAdmissionDialog } from '@/components/admin/AdminEditAdmissionDialog';
+import { CheckCircle, XCircle, Eye, Trash2, Edit } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function AdminAdmissionsPage() {
@@ -23,6 +24,7 @@ export default function AdminAdmissionsPage() {
   const [loading, setLoading] = useState(true);
   const [selectedAdmission, setSelectedAdmission] = useState<AdmissionWithStudent | null>(null);
   const [selectedAdmissionForDetails, setSelectedAdmissionForDetails] = useState<AdmissionWithStudent | null>(null);
+  const [selectedAdmissionForEdit, setSelectedAdmissionForEdit] = useState<AdmissionWithStudent | null>(null);
   const [notes, setNotes] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
@@ -59,6 +61,31 @@ export default function AdminAdmissionsPage() {
       toast({
         title: 'Error',
         description: 'Failed to update admission status',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this admission? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      setIsProcessing(true);
+      await admissionApi.deleteAdmission(id);
+      toast({
+        title: 'Success',
+        description: 'Admission deleted successfully',
+      });
+      loadAdmissions();
+    } catch (err) {
+      console.error(err);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete admission',
         variant: 'destructive',
       });
     } finally {
@@ -136,39 +163,59 @@ export default function AdminAdmissionsPage() {
                     </div>
                   )}
 
-                  {admission.status === 'submitted' && (
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() => setSelectedAdmission(admission)}
-                        className="gap-2"
-                      >
-                        <CheckCircle className="h-4 w-4" />
-                        Approve
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setSelectedAdmissionForDetails(admission)}
-                        className="gap-2"
-                      >
-                        <Eye className="h-4 w-4" />
-                        View Full Details
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => {
-                          setSelectedAdmission(admission);
-                          setNotes('');
-                        }}
-                        className="gap-2"
-                      >
-                        <XCircle className="h-4 w-4" />
-                        Reject
-                      </Button>
-                    </div>
-                  )}
+                  <div className="flex gap-2 flex-wrap">
+                    {admission.status === 'submitted' && (
+                      <>
+                        <Button
+                          size="sm"
+                          onClick={() => setSelectedAdmission(admission)}
+                          className="gap-2"
+                        >
+                          <CheckCircle className="h-4 w-4" />
+                          Approve
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => {
+                            setSelectedAdmission(admission);
+                            setNotes('');
+                          }}
+                          className="gap-2"
+                        >
+                          <XCircle className="h-4 w-4" />
+                          Reject
+                        </Button>
+                      </>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setSelectedAdmissionForDetails(admission)}
+                      className="gap-2"
+                    >
+                      <Eye className="h-4 w-4" />
+                      View Full Details
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => setSelectedAdmissionForEdit(admission)}
+                      className="gap-2"
+                    >
+                      <Edit className="h-4 w-4" />
+                      Edit
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleDelete(admission.id)}
+                      className="gap-2"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Delete
+                    </Button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -180,6 +227,13 @@ export default function AdminAdmissionsPage() {
         admission={selectedAdmissionForDetails}
         open={!!selectedAdmissionForDetails}
         onOpenChange={(open) => !open && setSelectedAdmissionForDetails(null)}
+      />
+
+      <AdminEditAdmissionDialog
+        admission={selectedAdmissionForEdit}
+        open={!!selectedAdmissionForEdit}
+        onOpenChange={(open) => !open && setSelectedAdmissionForEdit(null)}
+        onSuccess={loadAdmissions}
       />
 
       <Dialog open={!!selectedAdmission} onOpenChange={() => setSelectedAdmission(null)}>

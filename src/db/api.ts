@@ -21,6 +21,8 @@ export const admissionApi = {
   getPendingAdmissions: supabaseApi.getPendingAdmissions,
   createAdmission: supabaseApi.createAdmission,
   updateAdmissionStatus: supabaseApi.updateAdmissionStatus,
+  updateAdmission: supabaseApi.updateAdmission,
+  deleteAdmission: supabaseApi.deleteAdmission,
   uploadDocument: supabaseApi.uploadDocument,
 };
 
