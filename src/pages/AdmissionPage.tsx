@@ -98,7 +98,6 @@ export default function AdmissionPage() {
     child_photo: null,
     birth_certificate_file: null,
     aadhaar_card_file: null,
-    immunization_record_file: null,
     mother_signature_file: null,
     father_signature_file: null,
   });
@@ -809,48 +808,6 @@ export default function AdmissionPage() {
                           onClick={() => {
                             setUploadedFiles(prev => ({ ...prev, aadhaar_card_file: null }));
                             const inp = document.getElementById('aadhaar-input') as HTMLInputElement | null;
-                            if (inp) inp.value = '';
-                          }}
-                        >
-                          ×
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Immunization Record Upload */}
-                <div className="space-y-3">
-                  <FormLabel className="text-base font-semibold">Immunization Record</FormLabel>
-                  <div
-                    className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-primary hover:bg-blue-50 transition"
-                    onClick={() => document.getElementById('immunization-input')?.click()}
-                  >
-                    <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-                    <p className="text-sm font-medium">Click to upload</p>
-                    <p className="text-xs text-muted-foreground">PDF, JPG, PNG</p>
-                    <input
-                      id="immunization-input"
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0] || null;
-                        if (file) {
-                          setUploadedFiles(prev => ({ ...prev, immunization_record_file: file }));
-                          toast({ title: 'File selected', description: `${file.name} selected` });
-                        }
-                      }}
-                      className="hidden"
-                    />
-                    {uploadedFiles['immunization_record_file'] && (
-                      <div className="flex items-center gap-2">
-                        <p className="text-xs text-green-600 mt-2">✓ {uploadedFiles['immunization_record_file']?.name}</p>
-                        <button
-                          type="button"
-                          className="text-red-600 text-sm hover:underline"
-                          onClick={() => {
-                            setUploadedFiles(prev => ({ ...prev, immunization_record_file: null }));
-                            const inp = document.getElementById('immunization-input') as HTMLInputElement | null;
                             if (inp) inp.value = '';
                           }}
                         >
