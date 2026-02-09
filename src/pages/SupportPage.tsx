@@ -18,7 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Send, MessageSquare, ClipboardList, Paperclip } from 'lucide-react';
+import { Loader2, Send, MessageSquare, ClipboardList, Paperclip, CornerDownRight } from 'lucide-react';
 import { format } from 'date-fns';
 
 const formSchema = z.object({
@@ -228,6 +228,16 @@ export default function SupportPage() {
                                             {getStatusBadge(query.status)}
                                         </div>
                                         <p className="text-sm text-gray-600 line-clamp-2 mb-3">{query.message}</p>
+
+                                        {query.admin_reply && (
+                                            <div className="mb-3 pl-3 border-l-2 border-primary/30 bg-primary/5 p-2 rounded-r-md">
+                                                <p className="text-xs font-semibold text-primary mb-1 flex items-center gap-1">
+                                                    <CornerDownRight className="h-3 w-3" /> Response from School
+                                                </p>
+                                                <p className="text-sm text-gray-700">{query.admin_reply}</p>
+                                            </div>
+                                        )}
+
                                         <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-3 border-t">
                                             <span>Ref: {query.id.split('-')[0].toUpperCase()}</span>
                                             <span>{format(new Date(query.created_at), 'MMM d, yyyy h:mm a')}</span>

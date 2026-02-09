@@ -906,4 +906,28 @@ export const supabaseApi = {
         const { data } = supabase.storage.from('attachments').getPublicUrl(fileName);
         return data.publicUrl;
     },
+
+    replyToQuery: async (queryId: string, replyMessage: string): Promise<void> => {
+        const userId = await getCurrentUserId();
+        const { error } = await supabase
+            .from('queries')
+            .update({
+                status: 'replied',
+                admin_reply: replyMessage,
+                replied_by: userId,
+                replied_at: new Date().toISOString()
+            })
+            .eq('id', queryId);
+
+        if (error) throw error;
+    },
+
+    deleteQuery: async (queryId: string): Promise<void> => {
+        const { error } = await supabase
+            .from('queries')
+            .delete()
+            .eq('id', queryId);
+
+        if (error) throw error;
+    },
 };

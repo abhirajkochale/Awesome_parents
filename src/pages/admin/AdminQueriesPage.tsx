@@ -6,11 +6,34 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { MessageSquare, Clock, User } from 'lucide-react';
+import { MessageSquare, Clock, User, Trash2, Reply, Send, Loader2 } from 'lucide-react';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function AdminQueriesPage() {
     const [queries, setQueries] = useState<HelpQuery[]>([]);
     const [loading, setLoading] = useState(true);
+    const [replyingQuery, setReplyingQuery] = useState<HelpQuery | null>(null);
+    const [replyMessage, setReplyMessage] = useState('');
+    const [isSubmittingReply, setIsSubmittingReply] = useState(false);
     const { toast } = useToast();
 
     useEffect(() => {
@@ -31,6 +54,49 @@ export default function AdminQueriesPage() {
             });
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleDelete = async (id: string) => {
+        try {
+            await queryApi.deleteQuery(id);
+            toast({
+                title: 'Query Deleted',
+                description: 'The query has been successfully deleted.',
+            });
+            loadQueries();
+        } catch (error) {
+            console.error('Failed to delete query:', error);
+            toast({
+                variant: 'destructive',
+                title: 'Delete Failed',
+                description: 'Failed to delete the query.',
+            });
+        }
+    };
+
+    const handleReplySubmit = async () => {
+        if (!replyingQuery || !replyMessage.trim()) return;
+
+        try {
+            setIsSubmittingReply(true);
+            await queryApi.replyToQuery(replyingQuery.id, replyMessage);
+            toast({
+                title: 'Reply Sent',
+                description: 'Your reply has been sent to the parent.',
+            });
+            setReplyingQuery(null);
+            setReplyMessage('');
+            loadQueries();
+        } catch (error) {
+            console.error('Failed to send reply:', error);
+            toast({
+                variant: 'destructive',
+                title: 'Reply Failed',
+                description: 'Failed to send the reply.',
+            });
+        } finally {
+            setIsSubmittingReply(false);
         }
     };
 
@@ -88,7 +154,44 @@ export default function AdminQueriesPage() {
                                                 </div>
                                             </div>
                                         </div>
-                                        {getStatusBadge(query.status)}
+                                        <div className="flex items-center gap-2">
+                                            {getStatusBadge(query.status)}
+
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => {
+                                                    setReplyingQuery(query);
+                                                    setReplyMessage(query.admin_reply || '');
+                                                }}
+                                                className="gap-2"
+                                            >
+                                                <Reply className="h-4 w-4" />
+                                                Reply
+                                            </Button>
+
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="text-destructive hover:bg-destructive/10">
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>Delete Query?</AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            Are you sure you want to delete this query? This action cannot be undone.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                        <AlertDialogAction onClick={() => handleDelete(query.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                                            Delete
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        </div>
                                     </div>
                                     <div className="bg-white border rounded-lg p-4 ml-0 sm:ml-11">
                                         <p className="text-sm text-gray-700 whitespace-pre-wrap">{query.message}</p>
@@ -104,6 +207,14 @@ export default function AdminQueriesPage() {
                                                 </a>
                                             </div>
                                         )}
+                                        {query.admin_reply && (
+                                            <div className="mt-4 bg-blue-50 p-3 rounded border border-blue-100">
+                                                <p className="text-xs font-semibold text-blue-800 mb-1 flex items-center gap-1">
+                                                    <Reply className="h-3 w-3" /> Admin Reply
+                                                </p>
+                                                <p className="text-sm text-blue-900">{query.admin_reply}</p>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -111,6 +222,43 @@ export default function AdminQueriesPage() {
                     )}
                 </CardContent>
             </Card>
+
+            <Dialog open={!!replyingQuery} onOpenChange={(open) => !open && setReplyingQuery(null)}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Reply to Query</DialogTitle>
+                        <DialogDescription>
+                            Write a response to {replyingQuery?.parent?.full_name}'s query about "{replyingQuery?.subject}".
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="py-4">
+                        <Textarea
+                            value={replyMessage}
+                            onChange={(e) => setReplyMessage(e.target.value)}
+                            placeholder="Type your reply here..."
+                            className="min-h-[150px]"
+                        />
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setReplyingQuery(null)} disabled={isSubmittingReply}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleReplySubmit} disabled={!replyMessage.trim() || isSubmittingReply}>
+                            {isSubmittingReply ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Sending...
+                                </>
+                            ) : (
+                                <>
+                                    <Send className="mr-2 h-4 w-4" />
+                                    Send Reply
+                                </>
+                            )}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

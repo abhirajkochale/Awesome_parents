@@ -65,6 +65,8 @@ export const queryApi = {
   getMyQueries: supabaseApi.getMyQueries,
   getAllQueries: supabaseApi.getAllQueries,
   uploadQueryAttachment: supabaseApi.uploadQueryAttachment,
+  replyToQuery: supabaseApi.replyToQuery,
+  deleteQuery: supabaseApi.deleteQuery,
 };
 
 export const storageApi = {

@@ -172,6 +172,9 @@ export interface HelpQuery {
   message: string;
   attachment_url: string | null;
   status: 'open' | 'replied' | 'closed';
+  admin_reply?: string | null;
+  replied_by?: string | null;
+  replied_at?: string | null;
   created_at: string;
   updated_at: string;
   parent?: Profile;
