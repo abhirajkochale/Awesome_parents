@@ -49,8 +49,6 @@ export const supabaseApi = {
             username: metadata.username || user.email?.split('@')[0] || 'user',
             full_name: metadata.full_name || metadata.username || 'User',
             role: (metadata.role as 'parent' | 'admin') || 'parent',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
         };
 
         const { data: createdProfile, error: createError } = await supabase
