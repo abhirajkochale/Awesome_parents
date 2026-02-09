@@ -244,7 +244,7 @@ export default function AdmissionPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-base font-semibold">Academic Year *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} defaultValue={field.value || "2026-2027"}>
                       <FormControl>
                         <SelectTrigger className="h-11">
                           <SelectValue placeholder="Select academic year" />
@@ -996,27 +996,6 @@ export default function AdmissionPage() {
                   />
                 </div>
               </div>
-            </CardContent>
-          </Card>
-
-          {/* Academic Year */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Academic Year</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <FormField
-                control={form.control}
-                name="academic_year"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Academic Year</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., 2025-2026" {...field} />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
             </CardContent>
           </Card>
 
