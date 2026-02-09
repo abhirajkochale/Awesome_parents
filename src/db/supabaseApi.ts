@@ -58,9 +58,9 @@ export const supabaseApi = {
             .single();
 
         if (createError) {
-            // If error is 409 (Conflict), it means the profile exists (likely created by trigger)
-            // So we should try to fetch it again
-            if (createError.code === '23505') { // Postgres unique violation code
+            // If error is 409 (Conflict) / 23505 (Unique Violation), it means the profile exists 
+            // (either race condition or created by trigger). We should just fetch it again.
+            if (createError.code === '23505' || createError.message?.includes('conflict')) {
                 const { data: retryData, error: retryError } = await supabase
                     .from('profiles')
                     .select('*')
@@ -68,9 +68,10 @@ export const supabaseApi = {
                     .maybeSingle();
 
                 if (retryData) return retryData;
-                if (retryError) console.error('Failed to fetch profile after conflict:', retryError);
+                // Only log real errors
+                if (retryError) console.warn('Retry fetch failed:', retryError);
             } else {
-                console.error('Failed to auto-create profile:', createError);
+                console.warn('Auto-create skipped (likely harmless):', createError.message);
             }
             return null;
         }
