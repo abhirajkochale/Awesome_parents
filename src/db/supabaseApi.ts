@@ -128,7 +128,7 @@ export const supabaseApi = {
         if (!students) return [];
 
         // Fetch admissions for these students
-        const studentIds = students.map(s => s.id);
+        const studentIds = students.map((s: Student) => s.id);
         const { data: admissions, error: admissionsError } = await supabase
             .from('admissions')
             .select('*')
