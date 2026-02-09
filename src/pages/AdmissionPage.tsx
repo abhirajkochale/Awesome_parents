@@ -237,6 +237,31 @@ export default function AdmissionPage() {
               <CardTitle className="text-2xl font-semibold">Information of Child</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Academic Year Selection */}
+              <FormField
+                control={form.control}
+                name="academic_year"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base font-semibold">Academic Year *</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger className="h-11">
+                          <SelectValue placeholder="Select academic year" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="2024-2025">2024-2025</SelectItem>
+                        <SelectItem value="2025-2026">2025-2026</SelectItem>
+                        <SelectItem value="2026-2027">2026-2027</SelectItem>
+                        <SelectItem value="2027-2028">2027-2028</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               {/* Photos Upload Section */}
               <div className="grid md:grid-cols-3 gap-4 mb-6 pb-6 border-b">
                 <div
