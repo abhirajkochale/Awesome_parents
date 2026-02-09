@@ -7,7 +7,7 @@ interface RouteGuardProps {
 }
 
 // Routes accessible without login
-const PUBLIC_ROUTES = ['/login'];
+const PUBLIC_ROUTES = ['/login', '/forgot-password', '/update-password'];
 
 function matchPublicRoute(path: string, patterns: string[]) {
   return patterns.some(pattern => {
