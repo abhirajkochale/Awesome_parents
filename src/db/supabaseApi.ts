@@ -727,7 +727,7 @@ export const supabaseApi = {
         // Using cheap Count queries where possible
 
         const { count: totalStudents, error: err1 } = await supabase
-            .from('students')
+            .from('admissions')
             .select('*', { count: 'exact', head: true });
 
         const { count: pendingAdmissions, error: err2 } = await supabase
