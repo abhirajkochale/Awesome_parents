@@ -4,6 +4,8 @@ import AdminLayout from '@/components/layouts/AdminLayout';
 
 // Pages
 import LoginPage from '@/pages/LoginPage';
+import ForgotPasswordPage from '@/pages/ForgotPasswordPage';
+import UpdatePasswordPage from '@/pages/UpdatePasswordPage';
 import DashboardPage from '@/pages/DashboardPage';
 import AdmissionPage from '@/pages/AdmissionPage';
 import PaymentsPage from '@/pages/PaymentsPage';
@@ -34,6 +36,18 @@ const routes: RouteConfig[] = [
     name: 'Login',
     path: '/login',
     element: <LoginPage />,
+    visible: false,
+  },
+  {
+    name: 'Forgot Password',
+    path: '/forgot-password',
+    element: <ForgotPasswordPage />,
+    visible: false,
+  },
+  {
+    name: 'Update Password',
+    path: '/update-password',
+    element: <UpdatePasswordPage />,
     visible: false,
   },
   {
