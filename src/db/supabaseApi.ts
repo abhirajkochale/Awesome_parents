@@ -189,7 +189,7 @@ export const supabaseApi = {
         if (aErr) throw aErr;
         if (!admissions) return;
 
-        const admittedIds = new Set(admissions.map((a: Admission) => a.student_id));
+        const admittedIds = new Set(admissions.map((a: { student_id: string }) => a.student_id));
         const orphans = students.filter((s: { id: string }) => !admittedIds.has(s.id)).map((s: { id: string }) => s.id);
 
         // 3. Delete orphans
