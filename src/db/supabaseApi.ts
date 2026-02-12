@@ -94,12 +94,24 @@ export const supabaseApi = {
     },
 
     deleteProfile: async (userId: string): Promise<void> => {
-        const { error } = await supabase
-            .from('profiles')
-            .delete()
-            .eq('id', userId);
+        // Call the RPC function to delete the user from auth.users
+        const { error } = await supabase.rpc('delete_user_account', { user_id: userId });
 
-        if (error) throw error;
+        if (error) {
+            console.error("Error deleting user account:", error);
+            // Fallback: try to delete profile directly (though this leaves auth user orphan)
+            const { error: profileError } = await supabase
+                .from('profiles')
+                .delete()
+                .eq('id', userId);
+
+            if (profileError) throw profileError;
+
+            // If API didn't fail but RPC did (e.g. function missing), warn but don't crash
+            if (error.code !== 'PGRST202') { // Function not found
+                throw error;
+            }
+        }
     },
 
     updateProfile: async (id: string, updates: Partial<Profile>): Promise<Profile> => {
