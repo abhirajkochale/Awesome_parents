@@ -1,0 +1,169 @@
+/* stylelint-disable */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here.
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --radius: 0.5rem;
+    /* Warm, family-friendly color scheme for preschool portal */
+    --background: 45 20% 98%;
+    --foreground: 220 15% 20%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 15% 20%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 15% 20%;
+    /* Primary: Warm trustworthy blue */
+    --primary: 210 80% 50%;
+    --primary-foreground: 0 0% 100%;
+    /* Secondary: Soft coral/orange for warmth */
+    --secondary: 25 85% 65%;
+    --secondary-foreground: 220 15% 20%;
+    /* Muted: Neutral warm tones */
+    --muted: 45 15% 92%;
+    --muted-foreground: 220 10% 45%;
+    /* Accent: Light warm cream */
+    --accent: 45 60% 88%;
+    --accent-foreground: 220 15% 20%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 45 15% 88%;
+    --input: 45 15% 88%;
+    --ring: 210 80% 50%;
+    /* Status colors */
+    --success: 142 76% 45%;
+    --warning: 38 92% 50%;
+    --info: 210 80% 50%;
+    /* Education-specific colors */
+    --education-blue: 210 80% 50%;
+    --education-green: 142 76% 45%;
+    /* Chart colors - warm and friendly */
+    --chart-1: 210 80% 50%;
+    --chart-2: 142 76% 45%;
+    --chart-3: 25 85% 65%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 45 90% 55%;
+    /* Sidebar - warm neutral */
+    --sidebar-background: 45 25% 96%;
+    --sidebar-foreground: 220 15% 20%;
+    --sidebar-primary: 210 80% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 45 60% 88%;
+    --sidebar-accent-foreground: 220 15% 20%;
+    --sidebar-border: 45 15% 88%;
+    --sidebar-ring: 210 80% 50%;
+  }
+
+  .dark {
+    --background: 220 20% 12%;
+    --foreground: 45 20% 95%;
+    --card: 220 20% 15%;
+    --card-foreground: 45 20% 95%;
+    --popover: 220 20% 15%;
+    --popover-foreground: 45 20% 95%;
+    --primary: 210 80% 60%;
+    --primary-foreground: 220 20% 12%;
+    --secondary: 25 75% 55%;
+    --secondary-foreground: 220 20% 12%;
+    --muted: 220 15% 20%;
+    --muted-foreground: 45 10% 65%;
+    --accent: 220 15% 18%;
+    --accent-foreground: 45 20% 95%;
+    --destructive: 0 75% 50%;
+    --destructive-foreground: 45 20% 95%;
+    --border: 220 15% 22%;
+    --input: 220 15% 22%;
+    --ring: 210 80% 60%;
+    --success: 142 70% 50%;
+    --warning: 38 85% 55%;
+    --info: 210 80% 60%;
+    --education-blue: 210 80% 60%;
+    --education-green: 142 70% 50%;
+    --chart-1: 210 80% 60%;
+    --chart-2: 142 70% 50%;
+    --chart-3: 25 75% 55%;
+    --chart-4: 280 60% 65%;
+    --chart-5: 45 85% 60%;
+    --sidebar-background: 220 20% 10%;
+    --sidebar-foreground: 45 20% 95%;
+    --sidebar-primary: 210 80% 60%;
+    --sidebar-primary-foreground: 220 20% 10%;
+    --sidebar-accent: 220 15% 18%;
+    --sidebar-accent-foreground: 45 20% 95%;
+    --sidebar-border: 220 15% 22%;
+    --sidebar-ring: 210 80% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Global typography and layout refinements for better UX */
+@layer base {
+  html { font-size: 16px; }
+
+  body {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1 {
+    @apply text-3xl md:text-4xl font-bold leading-tight;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  h2 {
+    @apply text-2xl md:text-3xl font-semibold leading-snug;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  h3 {
+    @apply text-lg md:text-xl font-semibold;
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    @apply text-sm md:text-base text-muted-foreground;
+    margin-bottom: 0.75rem;
+  }
+
+  /* Container rhythm for comfortable reading width */
+  .container {
+    max-width: 1080px;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  /* Slightly increase card padding and consistent spacing */
+  .card, .Card, .card-root {
+    padding: 1rem 1.25rem;
+  }
+
+  /* Make action buttons more prominent and comfortable to tap */
+  button {
+    min-height: 44px;
+    padding-left: 0.875rem;
+    padding-right: 0.875rem;
+  }
+
+  /* Improve form field spacing */
+  input, textarea, select {
+    padding: 0.5rem 0.75rem;
+  }
+}
