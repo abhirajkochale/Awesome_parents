@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
@@ -21,6 +21,7 @@ import {
     Calendar,
     Bell,
     MessageSquare,
+    Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import React, { useState } from 'react';
@@ -41,9 +42,25 @@ const adminNavItems = [
 ];
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
-    const { profile, signOut } = useAuth();
+    const { profile, signOut, loading } = useAuth();
     const location = useLocation();
     const [settingsOpen, setSettingsOpen] = useState(false);
+
+    if (loading) {
+        return (
+            <div className="flex bg-background min-h-screen items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        );
+    }
+
+    if (!profile) {
+        return <Navigate to="/login" replace />;
+    }
+
+    if (profile.role !== 'admin') {
+        return <Navigate to="/" replace />;
+    }
 
     const handleSignOut = async () => {
         await signOut();
