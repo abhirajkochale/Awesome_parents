@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { GraduationCap } from 'lucide-react';
 
 export default function LoginPage() {
   const { login, signup, loginWithGoogle } = useAuth();
@@ -71,10 +70,12 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-accent/20 to-background p-4">
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="space-y-1 text-center">
-          <div className="flex justify-center mb-4">
-            <div className="p-3 bg-primary/10 rounded-full">
-              <GraduationCap className="h-10 w-10 text-primary" />
-            </div>
+          <div className="flex justify-center mb-6">
+            <img
+              src="/AwesomeKids_logo.jpeg"
+              alt="Awesome Kids Logo"
+              className="h-32 w-auto object-contain"
+            />
           </div>
           <CardTitle className="text-2xl font-bold">Preschool Parent Portal</CardTitle>
           <CardDescription>
