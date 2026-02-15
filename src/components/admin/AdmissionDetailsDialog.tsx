@@ -60,6 +60,16 @@ export function AdmissionDetailsDialog({
 
     const loadFileUrls = async () => {
         if (!admission?.uploaded_files) return;
+        
+        const hasFiles = Object.keys(admission.uploaded_files).length > 0;
+        if (!hasFiles) {
+            console.warn('No files in uploaded_files');
+            setImagesLoaded(true);
+            imagesLoadedRef.current = true;
+            setLoadingFiles(false);
+            return;
+        }
+        
         setLoadingFiles(true);
         setImagesLoaded(false);
         imagesLoadedRef.current = false;
