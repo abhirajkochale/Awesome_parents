@@ -39,10 +39,10 @@ export function AdmissionDetailsDialog({
             // Wait for images to be fully loaded before printing
             if (!imagesLoadedRef.current && admission?.uploaded_files) {
                 // Wait up to 10 seconds for images to load
-                let attempts = 0;
-                while (!imagesLoadedRef.current && attempts < 100) {
+                let pollAttempts = 0;
+                while (!imagesLoadedRef.current && pollAttempts < 100) {
                     await new Promise(resolve => setTimeout(resolve, 100));
-                    attempts++;
+                    pollAttempts++;
                 }
             }
         }
@@ -94,7 +94,7 @@ export function AdmissionDetailsDialog({
                     const reader = new FileReader();
                     reader.onloadend = () => {
                         const result = reader.result as string;
-                        console.log('Successfully converted image to base64, length:', result?.length);
+                        console.log('Successfully converted image to base64, length:', result.length);
                         resolve(result);
                     };
                     reader.onerror = () => {
