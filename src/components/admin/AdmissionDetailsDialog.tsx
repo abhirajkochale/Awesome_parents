@@ -27,6 +27,7 @@ export function AdmissionDetailsDialog({
     onOpenChange,
 }: AdmissionDetailsDialogProps) {
     const printRef = useRef<HTMLDivElement>(null);
+    const imagesLoadedRef = useRef(false);
     const [fileUrls, setFileUrls] = useState<Record<string, { url: string; type: 'image' | 'pdf' | 'other'; name: string }>>({});
     const [loadingFiles, setLoadingFiles] = useState(false);
     const [imagesLoaded, setImagesLoaded] = useState(false);
@@ -35,8 +36,14 @@ export function AdmissionDetailsDialog({
         contentRef: printRef,
         documentTitle: `Admission_${admission?.student?.full_name || 'Form'}_${new Date().getFullYear()}`,
         onBeforeGetContent: async () => {
-            if (Object.keys(fileUrls).length > 0 && !imagesLoaded) {
-                await new Promise(resolve => setTimeout(resolve, 1000));
+            // Wait for images to be fully loaded before printing
+            if (!imagesLoadedRef.current && admission?.uploaded_files) {
+                // Wait up to 10 seconds for images to load
+                let attempts = 0;
+                while (!imagesLoadedRef.current && attempts < 100) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    attempts++;
+                }
             }
         }
     } as any);
@@ -47,6 +54,7 @@ export function AdmissionDetailsDialog({
         } else {
             setFileUrls({});
             setImagesLoaded(false);
+            imagesLoadedRef.current = false;
         }
     }, [open, admission]);
 
@@ -54,6 +62,7 @@ export function AdmissionDetailsDialog({
         if (!admission?.uploaded_files) return;
         setLoadingFiles(true);
         setImagesLoaded(false);
+        imagesLoadedRef.current = false;
         const urls: Record<string, { url: string; type: 'image' | 'pdf' | 'other'; name: string }> = {};
 
         const getFileType = (path: string): 'image' | 'pdf' | 'other' => {
@@ -114,6 +123,7 @@ export function AdmissionDetailsDialog({
         await Promise.all(promises);
         setFileUrls(urls);
         setImagesLoaded(true);
+        imagesLoadedRef.current = true;
         setLoadingFiles(false);
     };
 
