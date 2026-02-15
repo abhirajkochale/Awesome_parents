@@ -27,6 +27,7 @@ export function AdmissionDetailsDialog({
     onOpenChange,
 }: AdmissionDetailsDialogProps) {
     const printRef = useRef<HTMLDivElement>(null);
+    const imagesLoadedRef = useRef(false);
     const [fileUrls, setFileUrls] = useState<Record<string, { url: string; type: 'image' | 'pdf' | 'other'; name: string }>>({});
     const [loadingFiles, setLoadingFiles] = useState(false);
     const [imagesLoaded, setImagesLoaded] = useState(false);
@@ -35,8 +36,14 @@ export function AdmissionDetailsDialog({
         contentRef: printRef,
         documentTitle: `Admission_${admission?.student?.full_name || 'Form'}_${new Date().getFullYear()}`,
         onBeforeGetContent: async () => {
-            if (Object.keys(fileUrls).length > 0 && !imagesLoaded) {
-                await new Promise(resolve => setTimeout(resolve, 1000));
+            // Wait for images to be fully loaded before printing
+            if (!imagesLoadedRef.current && admission?.uploaded_files) {
+                // Wait up to 10 seconds for images to load
+                let pollAttempts = 0;
+                while (!imagesLoadedRef.current && pollAttempts < 100) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    pollAttempts++;
+                }
             }
         }
     } as any);
@@ -47,13 +54,25 @@ export function AdmissionDetailsDialog({
         } else {
             setFileUrls({});
             setImagesLoaded(false);
+            imagesLoadedRef.current = false;
         }
     }, [open, admission]);
 
     const loadFileUrls = async () => {
         if (!admission?.uploaded_files) return;
+        
+        const hasFiles = Object.keys(admission.uploaded_files).length > 0;
+        if (!hasFiles) {
+            console.warn('No files in uploaded_files');
+            setImagesLoaded(true);
+            imagesLoadedRef.current = true;
+            setLoadingFiles(false);
+            return;
+        }
+        
         setLoadingFiles(true);
         setImagesLoaded(false);
+        imagesLoadedRef.current = false;
         const urls: Record<string, { url: string; type: 'image' | 'pdf' | 'other'; name: string }> = {};
 
         const getFileType = (path: string): 'image' | 'pdf' | 'other' => {
@@ -66,11 +85,22 @@ export function AdmissionDetailsDialog({
         const fetchImageAsBase64 = async (url: string): Promise<string | null> => {
             try {
                 const response = await fetch(url);
+                if (!response.ok) {
+                    console.error(`Failed to fetch image: ${response.status} ${response.statusText}`);
+                    return null;
+                }
                 const blob = await response.blob();
                 return new Promise((resolve) => {
                     const reader = new FileReader();
-                    reader.onloadend = () => resolve(reader.result as string);
-                    reader.onerror = () => resolve(null);
+                    reader.onloadend = () => {
+                        const result = reader.result as string;
+                        console.log('Successfully converted image to base64, length:', result.length);
+                        resolve(result);
+                    };
+                    reader.onerror = () => {
+                        console.error('FileReader error');
+                        resolve(null);
+                    };
                     reader.readAsDataURL(blob);
                 });
             } catch (err) {
@@ -81,6 +111,7 @@ export function AdmissionDetailsDialog({
 
         const promises = Object.entries(admission.uploaded_files).map(async ([key, path]) => {
             if (typeof path === 'string') {
+                console.log(`Loading file: ${key} from path: ${path}`);
                 let directUrl = path;
                 if (!path.startsWith('http')) {
                     const { data, error } = await supabase.storage
@@ -88,6 +119,7 @@ export function AdmissionDetailsDialog({
                         .createSignedUrl(path, 3600);
                     if (data?.signedUrl) {
                         directUrl = data.signedUrl;
+                        console.log(`Created signed URL for ${key}:`, directUrl.substring(0, 50) + '...');
                     } else {
                         console.error('Failed to sign URL for', key, error);
                         return;
@@ -101,9 +133,11 @@ export function AdmissionDetailsDialog({
                     const base64 = await fetchImageAsBase64(directUrl);
                     if (base64) {
                         urls[key] = { url: base64, type: 'image', name: key };
+                        console.log(`Successfully loaded image for ${key}`);
                     } else {
                         // Fallback to direct URL if fetch fails
                         urls[key] = { url: directUrl, type: 'image', name: key };
+                        console.warn(`Using direct URL fallback for ${key}`);
                     }
                 } else {
                     urls[key] = { url: directUrl, type: fileType, name: key };
@@ -112,8 +146,10 @@ export function AdmissionDetailsDialog({
         });
 
         await Promise.all(promises);
+        console.log('All images loaded. URLs:', Object.keys(urls));
         setFileUrls(urls);
         setImagesLoaded(true);
+        imagesLoadedRef.current = true;
         setLoadingFiles(false);
     };
 
