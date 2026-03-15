@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { dashboardApi, admissionApi, paymentApi, studentApi } from '@/db/api';
+import { dashboardApi, admissionApi, paymentApi } from '@/db/api';
 import type { AdminDashboardSummary, AdmissionWithStudent } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -31,13 +31,15 @@ export default function AdminDashboardPage() {
       const allAdmissions = await admissionApi.getAllAdmissions();
       setAdmissions(allAdmissions);
 
-      // Fetch payment details for each admission
+      // Fetch ALL payments in one call instead of N+1 per-admission calls
+      const allPayments = await paymentApi.getAllPayments();
       const paymentDetails: { [key: string]: { paid: number; total: number } } = {};
 
       for (const adm of allAdmissions) {
-        const p = await paymentApi.getPaymentsByAdmission(adm.id);
-        const approvedPayments = p.filter(payment => payment.status === 'approved');
-        const totalPaid = approvedPayments.reduce((sum, payment) => sum + Number(payment.amount), 0);
+        const admPayments = allPayments.filter(
+          (p) => p.admission_id === adm.id && p.status === 'approved'
+        );
+        const totalPaid = admPayments.reduce((sum, payment) => sum + Number(payment.amount), 0);
         paymentDetails[adm.id] = { paid: totalPaid, total: Number(adm.total_fee) };
       }
 

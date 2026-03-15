@@ -37,7 +37,32 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { DollarSign, Upload, CheckCircle, Clock, AlertCircle, Calendar, Loader2 } from 'lucide-react';
+import { DollarSign, Upload, CheckCircle, Clock, AlertCircle, Calendar, Loader2, FileText } from 'lucide-react';
+import { EmptyState } from '@/components/common/EmptyState';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05
+    }
+  }
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      type: 'spring' as const,
+      stiffness: 100
+    }
+  }
+};
 
 const paymentFormSchema = z.object({
   admission_id: z.string().min(1, 'Please select an admission'),
@@ -56,6 +81,7 @@ export default function PaymentsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const form = useForm<PaymentFormData>({
     resolver: zodResolver(paymentFormSchema),
@@ -235,27 +261,32 @@ export default function PaymentsPage() {
     : null;
 
   return (
-    <div className="space-y-8">
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+      className="space-y-8"
+    >
       {/* Header */}
-      <div className="space-y-2">
-        <h1 className="text-4xl font-bold tracking-tight">Fees & Payments</h1>
-        <p className="text-muted-foreground">Manage and track all fee payments</p>
-      </div>
-
-      {/* Important Deadline Alert */}
-      <Alert className="border-orange-200 bg-orange-50">
-        <AlertCircle className="h-4 w-4 text-orange-600" />
-        <AlertDescription className="text-orange-900">
-          <strong>Important Deadline:</strong> Final payment must be completed by <strong>October 15, 2025</strong>
-        </AlertDescription>
-      </Alert>
+      <motion.div variants={itemVariants} className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="space-y-2">
+          <h1 className="text-4xl font-bold tracking-tight">Fees & Payments</h1>
+          <p className="text-muted-foreground">Manage and track all fee payments</p>
+        </div>
+      </motion.div>
 
       {admissions.length === 0 ? (
-        <Alert>
-          <AlertDescription>
-            No approved admissions found. Please submit an admission form first.
-          </AlertDescription>
-        </Alert>
+        <motion.div variants={itemVariants}>
+          <EmptyState
+            icon={FileText}
+            title="No Approved Admissions"
+            description="It looks like you don't have any approved admissions yet. Please submit an admission form or wait until your current application gets approved to start making payments."
+            action={{
+              label: "Apply Now",
+              onClick: () => navigate('/admission')
+            }}
+          />
+        </motion.div>
       ) : (
         <>
           {/* Fee Summary Card */}
@@ -414,75 +445,88 @@ export default function PaymentsPage() {
             </Card>
           )}
 
-          {/* Payment Timeline/History */}
-          <Card>
-            <CardHeader className="border-b">
-              <CardTitle>Payment History</CardTitle>
-              <CardDescription>All your recorded payments</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6">
-              {payments.length === 0 ? (
-                <div className="text-center py-12">
-                  <DollarSign className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-20" />
-                  <p className="text-muted-foreground font-medium">No payments recorded yet</p>
-                  <p className="text-sm text-muted-foreground mt-1">Submit your first payment to get started</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {payments
-                    .sort((a, b) => new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime())
-                    .map((payment) => (
-                      <div key={payment.id} className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-lg hover:bg-muted/30 transition-colors gap-3">
-                        <div className="flex items-start gap-4 flex-1">
-                          <div className="mt-1">
-                            <Calendar className="h-5 w-5 text-blue-500" />
-                          </div>
-                          <div className="space-y-1 flex-1">
-                            <div className="flex items-center gap-3">
-                              <h3 className="font-semibold text-lg">₹{payment.amount.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</h3>
-                              {getStatusBadge(payment.status)}
+          {/* Payment History Card */}
+          <motion.div variants={itemVariants}>
+            <Card>
+              <CardHeader className="border-b">
+                <CardTitle>Payment History</CardTitle>
+                <CardDescription>All your recorded payments</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                {payments.length === 0 ? (
+                  <EmptyState
+                    icon={DollarSign}
+                    title="No payments recorded yet"
+                    description="Submit your first payment by clicking the Make Payment button above to get started."
+                  />
+                ) : (
+                  <motion.div
+                    variants={containerVariants}
+                    className="space-y-3"
+                  >
+                    {payments
+                      .sort((a, b) => new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime())
+                      .map((payment) => (
+                        <motion.div
+                          key={payment.id}
+                          variants={itemVariants}
+                          whileHover={{ scale: 1.01 }}
+                        >
+                          <div className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-lg hover:bg-muted/30 transition-colors gap-3">
+                            <div className="flex items-start gap-4 flex-1">
+                              <div className="mt-1">
+                                <span className="flex p-2 bg-blue-50 rounded-full">
+                                  <Calendar className="h-5 w-5 text-blue-500" />
+                                </span>
+                              </div>
+                              <div className="space-y-1 flex-1">
+                                <div className="flex items-center gap-3">
+                                  <h3 className="font-semibold text-lg">₹{payment.amount.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</h3>
+                                  {getStatusBadge(payment.status)}
+                                </div>
+                                <p className="text-sm text-muted-foreground">
+                                  {format(new Date(payment.payment_date), 'EEEE, MMMM d, yyyy')} • {payment.payment_type === 'initial' ? 'Initial Payment' : 'Installment'}
+                                </p>
+                                {payment.verification_notes && (
+                                  <p className="text-sm text-muted-foreground italic mt-2">
+                                    Note: {payment.verification_notes}
+                                  </p>
+                                )}
+                              </div>
                             </div>
-                            <p className="text-sm text-muted-foreground">
-                              {format(new Date(payment.payment_date), 'EEEE, MMMM d, yyyy')} • {payment.payment_type === 'initial' ? 'Initial Payment' : 'Installment'}
-                            </p>
-                            {payment.verification_notes && (
-                              <p className="text-sm text-muted-foreground italic mt-2">
-                                Note: {payment.verification_notes}
-                              </p>
-                            )}
-                          </div>
-                        </div>
 
-                        <div className="md:flex-shrink-0">
-                          {payment.receipt_url ? (
-                            <Button variant="outline" size="sm" asChild>
-                              <a href={payment.receipt_url} target="_blank" rel="noopener noreferrer">
-                                <Upload className="mr-2 h-4 w-4" />
-                                View Receipt
-                              </a>
-                            </Button>
-                          ) : (
-                            <div className="hidden">
-                              <Input
-                                type="file"
-                                accept="image/*"
-                                id={`upload-${payment.id}`}
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0];
-                                  if (file) handleUploadReceipt(payment.id, file);
-                                }}
-                              />
+                            <div className="md:flex-shrink-0">
+                              {payment.receipt_url ? (
+                                <Button variant="outline" size="sm" asChild className="shadow-sm">
+                                  <a href={payment.receipt_url} target="_blank" rel="noopener noreferrer">
+                                    <Upload className="mr-2 h-4 w-4" />
+                                    View Receipt
+                                  </a>
+                                </Button>
+                              ) : (
+                                <div className="hidden">
+                                  <Input
+                                    type="file"
+                                    accept="image/*"
+                                    id={`upload-${payment.id}`}
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0];
+                                      if (file) handleUploadReceipt(payment.id, file);
+                                    }}
+                                  />
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                          </div>
+                        </motion.div>
+                      ))}
+                  </motion.div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
         </>
       )}
-    </div>
+    </motion.div>
   );
 }

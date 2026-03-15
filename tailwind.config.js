@@ -98,7 +98,11 @@ export default {
             },
             boxShadow: {
                 card: 'var(--shadow-card)',
-                hover: 'var(--shadow-hover)'
+                hover: 'var(--shadow-hover)',
+                'nm-flat': 'var(--nm-shadow-flat)',
+                'nm-flat-sm': 'var(--nm-shadow-flat-sm)',
+                'nm-pressed': 'var(--nm-shadow-pressed)',
+                'nm-pressed-sm': 'var(--nm-shadow-pressed-sm)',
             },
             keyframes: {
                 'accordion-down': {

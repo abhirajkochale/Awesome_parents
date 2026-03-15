@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { BrandLoader } from '@/components/common/BrandLoader';
 
 interface RouteGuardProps {
   children: React.ReactNode;
@@ -60,11 +61,7 @@ export function RouteGuard({ children }: RouteGuardProps) {
   }, [user, loading, location.pathname, navigate]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    );
+    return <BrandLoader fullScreen text="Verifying session..." />;
   }
 
   // Use a fragment to avoid adding extra DOM nodes

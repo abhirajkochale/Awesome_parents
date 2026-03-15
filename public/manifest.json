@@ -1,0 +1,22 @@
+{
+  "name": "AwesomeKids Parent Portal",
+  "short_name": "AwesomeKids",
+  "description": "Preschool parent portal for admissions, payments, events, and announcements",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#faf9f6",
+  "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

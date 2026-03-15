@@ -21,11 +21,13 @@ import {
     Calendar,
     Bell,
     MessageSquare,
-    Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import React, { useState } from 'react';
 import { ProfileSettingsDialog } from '@/components/common/ProfileSettingsDialog';
+import { ThemeToggle } from '@/components/common/ThemeToggle';
+import { BrandLoader } from '@/components/common/BrandLoader';
+import { NotificationBell } from '@/components/common/NotificationBell';
 
 interface AdminLayoutProps {
     children: React.ReactNode;
@@ -47,11 +49,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     const [settingsOpen, setSettingsOpen] = useState(false);
 
     if (loading) {
-        return (
-            <div className="flex bg-background min-h-screen items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-        );
+        return <BrandLoader fullScreen text="Loading Admin Portal..." />;
     }
 
     if (!profile) {
@@ -106,11 +104,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     return (
         <div className="flex min-h-screen w-full bg-background">
             {/* Desktop Sidebar */}
-            <aside className="hidden lg:block w-64 border-r bg-card shrink-0">
+            <aside className="hidden lg:block w-64 border-r bg-sidebar shrink-0 relative z-20">
                 <div className="flex flex-col h-full">
                     <div className="p-4 border-b flex justify-center flex-col items-center">
                         <Link to="/admin" className="flex items-center w-full justify-center">
-                            <img src="/AwesomeKids_logo.jpeg" alt="AwesomeKids" className="h-12 w-auto object-contain" />
+                            <img src="/AwesomeKids_logo.jpeg" alt="AwesomeKids" className="h-12 w-auto object-contain dark:invert-[0.05] dark:brightness-90" />
                         </Link>
                         <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground mt-2">Admin Portal</span>
                     </div>
@@ -140,7 +138,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             {/* Main Content */}
             <div className="flex-1 flex flex-col min-w-0">
                 {/* Mobile Header */}
-                <header className="lg:hidden sticky top-0 z-50 w-full border-b bg-card">
+                <header className="lg:hidden sticky top-0 z-50 w-full glass">
                     <div className="flex items-center justify-between p-4">
                         <div className="flex items-center gap-2">
                             <Link to="/admin" className="flex items-center">
@@ -150,6 +148,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                         </div>
 
                         <div className="flex items-center gap-2">
+                            <NotificationBell />
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                     <Button variant="ghost" size="icon" className="rounded-full">
@@ -208,7 +207,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                 </header>
 
                 {/* Desktop Header */}
-                <header className="hidden lg:flex sticky top-0 z-50 w-full border-b bg-card">
+                <header className="hidden lg:flex sticky top-0 z-50 w-full glass">
                     <div className="flex items-center justify-between w-full px-6 py-4">
                         <div>
                             <h2 className="text-xl font-semibold">
@@ -216,7 +215,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                             </h2>
                         </div>
 
-                        <DropdownMenu>
+                        <div className="flex items-center gap-2">
+                            <ThemeToggle />
+                            <NotificationBell />
+                            <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" className="gap-2">
                                     <Avatar className="h-8 w-8">
@@ -249,6 +251,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
+                        </div>
                     </div>
                 </header>
 

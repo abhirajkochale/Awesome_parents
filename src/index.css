@@ -9,75 +9,96 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --radius: 0.5rem;
-    /* Warm, family-friendly color scheme for preschool portal */
-    --background: 45 20% 98%;
+    --radius: 1rem; /* Softer, bigger corners for neumorphism */
+    /* Warm, family-friendly color scheme for preschool portal - Neumorphic Base */
+    --background: 210 20% 95%; /* Soft gray-blue background */
     --foreground: 220 15% 20%;
-    --card: 0 0% 100%;
+    --card: 210 20% 95%; /* Card matches background for neumorphic effect */
     --card-foreground: 220 15% 20%;
-    --popover: 0 0% 100%;
+    --popover: 210 20% 95%;
     --popover-foreground: 220 15% 20%;
-    /* Primary: Warm trustworthy blue */
-    --primary: 210 80% 50%;
+    
+    /* Primary: Fun Blue from logo */
+    --primary: 210 100% 52%;
     --primary-foreground: 0 0% 100%;
-    /* Secondary: Soft coral/orange for warmth */
-    --secondary: 25 85% 65%;
+    /* Secondary: Fun Orange from logo */
+    --secondary: 25 100% 60%;
     --secondary-foreground: 220 15% 20%;
-    /* Muted: Neutral warm tones */
-    --muted: 45 15% 92%;
+    
+    --muted: 210 20% 90%;
     --muted-foreground: 220 10% 45%;
-    /* Accent: Light warm cream */
-    --accent: 45 60% 88%;
+    --accent: 210 40% 90%;
     --accent-foreground: 220 15% 20%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 45 15% 88%;
-    --input: 45 15% 88%;
-    --ring: 210 80% 50%;
+    --border: 210 20% 88%;
+    --input: 210 20% 90%;
+    --ring: 210 100% 52%;
+
+    /* Neumorphic Shadow Tokens */
+    --nm-light: 0 0% 100%;
+    --nm-dark: 210 20% 85%;
+    --nm-shadow-flat: 6px 6px 12px hsl(var(--nm-dark)), -6px -6px 12px hsl(var(--nm-light));
+    --nm-shadow-flat-sm: 3px 3px 6px hsl(var(--nm-dark)), -3px -3px 6px hsl(var(--nm-light));
+    --nm-shadow-pressed: inset 6px 6px 12px hsl(var(--nm-dark)), inset -6px -6px 12px hsl(var(--nm-light));
+    --nm-shadow-pressed-sm: inset 3px 3px 6px hsl(var(--nm-dark)), inset -3px -3px 6px hsl(var(--nm-light));
+    
     /* Status colors */
     --success: 142 76% 45%;
     --warning: 38 92% 50%;
     --info: 210 80% 50%;
+    
     /* Education-specific colors */
     --education-blue: 210 80% 50%;
     --education-green: 142 76% 45%;
-    /* Chart colors - warm and friendly */
+    
+    /* Chart colors */
     --chart-1: 210 80% 50%;
     --chart-2: 142 76% 45%;
     --chart-3: 25 85% 65%;
     --chart-4: 280 65% 60%;
     --chart-5: 45 90% 55%;
-    /* Sidebar - warm neutral */
-    --sidebar-background: 45 25% 96%;
+
+    /* Sidebar */
+    --sidebar-background: 210 20% 94%;
     --sidebar-foreground: 220 15% 20%;
-    --sidebar-primary: 210 80% 50%;
+    --sidebar-primary: 210 100% 52%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 45 60% 88%;
+    --sidebar-accent: 210 30% 90%;
     --sidebar-accent-foreground: 220 15% 20%;
-    --sidebar-border: 45 15% 88%;
-    --sidebar-ring: 210 80% 50%;
+    --sidebar-border: 210 20% 88%;
+    --sidebar-ring: 210 100% 52%;
   }
 
   .dark {
-    --background: 220 20% 12%;
-    --foreground: 45 20% 95%;
-    --card: 220 20% 15%;
-    --card-foreground: 45 20% 95%;
-    --popover: 220 20% 15%;
-    --popover-foreground: 45 20% 95%;
-    --primary: 210 80% 60%;
-    --primary-foreground: 220 20% 12%;
-    --secondary: 25 75% 55%;
-    --secondary-foreground: 220 20% 12%;
-    --muted: 220 15% 20%;
-    --muted-foreground: 45 10% 65%;
-    --accent: 220 15% 18%;
-    --accent-foreground: 45 20% 95%;
-    --destructive: 0 75% 50%;
-    --destructive-foreground: 45 20% 95%;
-    --border: 220 15% 22%;
-    --input: 220 15% 22%;
-    --ring: 210 80% 60%;
+    --background: 224 71% 4%;
+    --foreground: 213 31% 91%;
+    --card: 224 71% 4%;
+    --card-foreground: 213 31% 91%;
+    --popover: 224 71% 4%;
+    --popover-foreground: 213 31% 91%;
+    --primary: 210 100% 65%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 25 100% 65%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 223 47% 11%;
+    --muted-foreground: 215.4 16.3% 56.9%;
+    --accent: 216 34% 17%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 216 34% 17%;
+    --input: 216 34% 17%;
+    --ring: 216 34% 17%;
+
+    /* Neumorphic Shadow Tokens (Dark Mode) - Deeper contrast */
+    --nm-light: 223 47% 11%;
+    --nm-dark: 224 71% 2%;
+    --nm-shadow-flat: 6px 6px 12px hsl(var(--nm-dark)), -6px -6px 12px hsl(var(--nm-light));
+    --nm-shadow-flat-sm: 4px 4px 8px hsl(var(--nm-dark)), -4px -4px 8px hsl(var(--nm-light));
+    --nm-shadow-pressed: inset 6px 6px 12px hsl(var(--nm-dark)), inset -6px -6px 12px hsl(var(--nm-light));
+    --nm-shadow-pressed-sm: inset 4px 4px 8px hsl(var(--nm-dark)), inset -4px -4px 8px hsl(var(--nm-light));
+
     --success: 142 70% 50%;
     --warning: 38 85% 55%;
     --info: 210 80% 60%;
@@ -88,14 +109,14 @@ All colors MUST be HSL.
     --chart-3: 25 75% 55%;
     --chart-4: 280 60% 65%;
     --chart-5: 45 85% 60%;
-    --sidebar-background: 220 20% 10%;
-    --sidebar-foreground: 45 20% 95%;
-    --sidebar-primary: 210 80% 60%;
-    --sidebar-primary-foreground: 220 20% 10%;
-    --sidebar-accent: 220 15% 18%;
-    --sidebar-accent-foreground: 45 20% 95%;
-    --sidebar-border: 220 15% 22%;
-    --sidebar-ring: 210 80% 60%;
+    --sidebar-background: 224 71% 6%;
+    --sidebar-foreground: 213 31% 91%;
+    --sidebar-primary: 210 100% 65%;
+    --sidebar-primary-foreground: 222.2 47.4% 11.2%;
+    --sidebar-accent: 216 34% 17%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 216 34% 17%;
+    --sidebar-ring: 210 100% 65%;
   }
 }
 
@@ -165,5 +186,25 @@ All colors MUST be HSL.
   /* Improve form field spacing */
   input, textarea, select {
     padding: 0.5rem 0.75rem;
+  }
+  /* Glassmorphism */
+  .glass {
+    @apply bg-white/60 backdrop-blur-md border border-white/20;
+  }
+  
+  .dark .glass {
+    @apply bg-black/40 backdrop-blur-md border border-white/10;
+  }
+
+  /* Rainbow Accent */
+  .text-rainbow {
+    background: linear-gradient(to right, #3b82f6, #f97316, #eab308, #8b5cf6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .bg-rainbow {
+    background: linear-gradient(to right, #3b82f6, #f97316, #eab308, #8b5cf6);
   }
 }

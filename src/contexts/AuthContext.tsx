@@ -8,7 +8,7 @@ interface AuthContextType {
   profile: Profile | null; // Keeping both for compatibility, though they might be same
   loading: boolean;
   login: (email: string, password: string) => Promise<{ error: Error | null }>;
-  signup: (email: string, password: string, username: string, role?: 'parent' | 'admin') => Promise<{ error: Error | null }>;
+  signup: (email: string, password: string, username: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
   loginWithGoogle: () => Promise<{ error: Error | null }>;
@@ -75,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const signup = async (email: string, password: string, username: string, role: 'parent' | 'admin' = 'parent') => {
+  const signup = async (email: string, password: string, username: string) => {
     try {
       const { error } = await supabase.auth.signUp({
         email,
@@ -84,7 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           data: {
             username,
             full_name: username, // Default full_name to username initially
-            role,
+            role: 'parent', // Always default to parent — admin promotion only via admin panel
           },
         },
       });

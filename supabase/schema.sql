@@ -176,39 +176,71 @@ values ('documents', 'documents', false) -- Private bucket for admission docs
 on conflict (id) do nothing;
 
 
--- 8. RLS POLICIES
--- For DEVELOPMENT purposes, we allow authenticated users broad access. 
--- In a real production app, you would refine 'using' clauses to check user IDs.
+-- 8. RLS POLICIES (Production-ready)
+-- Parents can only access their own data. Admins can access everything.
 
 -- NOTE: Since storage policies are on the GLOBAL 'storage.objects' table, we must confirm existence or drop before creating
 -- to avoid "policy already exists" errors when resetting the database.
 
 -- Students
-create policy "Authenticated users can view students" on students for select using (auth.role() = 'authenticated');
-create policy "Authenticated users can insert students" on students for insert with check (auth.role() = 'authenticated');
-create policy "Authenticated users can update students" on students for update using (auth.role() = 'authenticated');
+create policy "Parents view own students" on students for select using (auth.uid() = parent_id);
+create policy "Admins view all students" on students for select using (
+  exists (select 1 from profiles where id = auth.uid() and role = 'admin')
+);
+create policy "Parents insert own students" on students for insert with check (auth.uid() = parent_id);
+create policy "Parents update own students" on students for update using (auth.uid() = parent_id);
+create policy "Admins update all students" on students for update using (
+  exists (select 1 from profiles where id = auth.uid() and role = 'admin')
+);
 
 -- Admissions
-create policy "Authenticated users can view admissions" on admissions for select using (auth.role() = 'authenticated');
-create policy "Authenticated users can insert admissions" on admissions for insert with check (auth.role() = 'authenticated');
-create policy "Authenticated users can update admissions" on admissions for update using (auth.role() = 'authenticated');
+create policy "Parents view own admissions" on admissions for select using (auth.uid() = parent_id);
+create policy "Admins view all admissions" on admissions for select using (
+  exists (select 1 from profiles where id = auth.uid() and role = 'admin')
+);
+create policy "Parents insert own admissions" on admissions for insert with check (auth.uid() = parent_id);
+create policy "Parents update own admissions" on admissions for update using (auth.uid() = parent_id);
+create policy "Admins update all admissions" on admissions for update using (
+  exists (select 1 from profiles where id = auth.uid() and role = 'admin')
+);
+create policy "Admins delete admissions" on admissions for delete using (
+  exists (select 1 from profiles where id = auth.uid() and role = 'admin')
+);
 
 -- Payments
-create policy "Authenticated users can view payments" on payments for select using (auth.role() = 'authenticated');
-create policy "Authenticated users can insert payments" on payments for insert with check (auth.role() = 'authenticated');
-create policy "Authenticated users can update payments" on payments for update using (auth.role() = 'authenticated');
+create policy "Parents view own payments" on payments for select using (auth.uid() = parent_id);
+create policy "Admins view all payments" on payments for select using (
+  exists (select 1 from profiles where id = auth.uid() and role = 'admin')
+);
+create policy "Parents insert own payments" on payments for insert with check (auth.uid() = parent_id);
+create policy "Parents update own payments" on payments for update using (auth.uid() = parent_id);
+create policy "Admins update all payments" on payments for update using (
+  exists (select 1 from profiles where id = auth.uid() and role = 'admin')
+);
 
--- Events
+-- Events (public read, admin-only write)
 create policy "Everyone can view events" on events for select using (true);
-create policy "Authenticated users can insert events" on events for insert with check (auth.role() = 'authenticated');
-create policy "Authenticated users can update events" on events for update using (auth.role() = 'authenticated');
-create policy "Authenticated users can delete events" on events for delete using (auth.role() = 'authenticated');
+create policy "Admins insert events" on events for insert with check (
+  exists (select 1 from profiles where id = auth.uid() and role = 'admin')
+);
+create policy "Admins update events" on events for update using (
+  exists (select 1 from profiles where id = auth.uid() and role = 'admin')
+);
+create policy "Admins delete events" on events for delete using (
+  exists (select 1 from profiles where id = auth.uid() and role = 'admin')
+);
 
--- Announcements
+-- Announcements (public read, admin-only write)
 create policy "Everyone can view announcements" on announcements for select using (true);
-create policy "Authenticated users can insert announcements" on announcements for insert with check (auth.role() = 'authenticated');
-create policy "Authenticated users can update announcements" on announcements for update using (auth.role() = 'authenticated');
-create policy "Authenticated users can delete announcements" on announcements for delete using (auth.role() = 'authenticated');
+create policy "Admins insert announcements" on announcements for insert with check (
+  exists (select 1 from profiles where id = auth.uid() and role = 'admin')
+);
+create policy "Admins update announcements" on announcements for update using (
+  exists (select 1 from profiles where id = auth.uid() and role = 'admin')
+);
+create policy "Admins delete announcements" on announcements for delete using (
+  exists (select 1 from profiles where id = auth.uid() and role = 'admin')
+);
 
 -- Storage Policies
 -- CAREFUL: These policies are on `storage.objects` which is NOT dropped by `drop table ...`.
@@ -250,6 +282,9 @@ create table queries (
   message text not null,
   attachment_url text,
   status text default 'open' check (status in ('open', 'replied', 'closed')),
+  admin_reply text,
+  replied_by uuid references profiles(id),
+  replied_at timestamp with time zone,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
