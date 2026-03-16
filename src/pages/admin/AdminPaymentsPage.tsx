@@ -65,7 +65,7 @@ export default function AdminPaymentsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Verify Payments</h1>
+        <h1 className="text-xl md:text-3xl font-bold">Verify Payments</h1>
         <p className="text-muted-foreground">Review and verify payment receipts</p>
       </div>
 

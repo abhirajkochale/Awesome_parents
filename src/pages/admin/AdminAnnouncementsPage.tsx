@@ -102,7 +102,7 @@ export default function AdminAnnouncementsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Manage Announcements</h1>
+          <h1 className="text-xl md:text-3xl font-bold">Manage Announcements</h1>
           <p className="text-muted-foreground">Create and manage school announcements</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

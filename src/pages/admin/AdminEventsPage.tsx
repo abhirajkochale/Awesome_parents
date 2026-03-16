@@ -118,7 +118,7 @@ export default function AdminEventsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Manage Events</h1>
+          <h1 className="text-xl md:text-3xl font-bold">Manage Events</h1>
           <p className="text-muted-foreground">Create and manage school events</p>
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

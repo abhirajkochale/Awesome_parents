@@ -40,6 +40,9 @@ export interface Student {
   preferred_whatsapp?: string;
   previous_school?: string;
   language_known?: string;
+  batch_id?: string;
+  batch_time?: string;
+  batch_label?: string;
   medical_conditions: string | null;
   allergies: string | null;
   created_at: string;
@@ -53,6 +56,8 @@ export interface Admission {
   admission_date: string;
   status: AdmissionStatus;
   total_fee: number;
+  discount_amount?: number;
+  final_fee?: number;
   uploaded_files?: Record<string, string>;
   notes: string | null;
   created_at: string;
@@ -136,6 +141,7 @@ export interface AdmissionFormData {
   father_email?: string;
   preferred_whatsapp: string;
   previous_school?: string;
+  language_known?: string;
   // Fee info
   total_fee: number;
   uploaded_files?: Record<string, string>;

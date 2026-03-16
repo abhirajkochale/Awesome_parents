@@ -87,7 +87,7 @@ export default function AdminUsersPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Manage Users</h1>
+        <h1 className="text-xl md:text-3xl font-bold">Manage Users</h1>
         <p className="text-muted-foreground">View and manage user roles</p>
       </div>
 

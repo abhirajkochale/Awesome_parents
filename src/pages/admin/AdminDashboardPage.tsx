@@ -61,8 +61,8 @@ export default function AdminDashboardPage() {
 
   if (loading) {
     return (
-      <div className="space-y-8">
-        <div className="grid gap-6 md:grid-cols-4">
+      <div className="space-y-4 md:space-y-8">
+        <div className="grid gap-3 md:gap-6 md:grid-cols-4">
           {[...Array(4)].map((_, i) => (
             <Skeleton key={i} className="h-32 bg-muted shadow-sm" />
           ))}
@@ -72,14 +72,14 @@ export default function AdminDashboardPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 md:space-y-8">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight mb-2">Student Dashboard</h1>
-          <p className="text-base text-muted-foreground">Detailed view of all student admissions and fees</p>
+          <h1 className="text-xl md:text-3xl font-bold tracking-tight mb-1 md:mb-2">Student Dashboard</h1>
+          <p className="text-sm md:text-base text-muted-foreground">Detailed view of all student admissions and fees</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-2 md:gap-3">
           <Button asChild variant="outline" className="shadow-sm">
             <Link to="/admin/events">
               <Calendar className="mr-2 h-4 w-4" />
@@ -96,7 +96,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Summary Stats Cards */}
-      <div className="grid gap-6 md:grid-cols-4">
+      <div className="grid gap-3 md:gap-6 grid-cols-2 md:grid-cols-4">
         <Card className="shadow-sm hover:shadow-md transition-all duration-200">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
@@ -107,7 +107,7 @@ export default function AdminDashboardPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-gray-900">{summary?.totalStudents || 0}</div>
+            <div className="text-2xl md:text-3xl font-bold text-gray-900">{summary?.totalStudents || 0}</div>
             <p className="text-xs text-muted-foreground mt-1">Active enrollments</p>
           </CardContent>
         </Card>
@@ -122,7 +122,7 @@ export default function AdminDashboardPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-amber-600">{summary?.pendingAdmissions || 0}</div>
+            <div className="text-2xl md:text-3xl font-bold text-amber-600">{summary?.pendingAdmissions || 0}</div>
             <p className="text-xs text-muted-foreground mt-1">Awaiting review</p>
           </CardContent>
         </Card>
@@ -137,7 +137,7 @@ export default function AdminDashboardPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-orange-600">{summary?.pendingPayments || 0}</div>
+            <div className="text-2xl md:text-3xl font-bold text-orange-600">{summary?.pendingPayments || 0}</div>
             <p className="text-xs text-muted-foreground mt-1">Needs verification</p>
           </CardContent>
         </Card>
@@ -152,7 +152,7 @@ export default function AdminDashboardPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-green-600">₹{summary?.totalRevenue.toLocaleString('en-IN', { maximumFractionDigits: 0 }) || 0}</div>
+            <div className="text-2xl md:text-3xl font-bold text-green-600">₹{summary?.totalRevenue.toLocaleString('en-IN', { maximumFractionDigits: 0 }) || 0}</div>
             <p className="text-xs text-muted-foreground mt-1">Verified payments</p>
           </CardContent>
         </Card>
@@ -161,8 +161,8 @@ export default function AdminDashboardPage() {
       {/* Main Student List Table */}
       <Card className="shadow-sm">
         <CardHeader className="pb-4">
-          <CardTitle className="text-xl font-semibold">Student Admissions & Fee Details</CardTitle>
-          <CardDescription className="text-sm">Comprehensive list of students who have filled the admission form</CardDescription>
+          <CardTitle className="text-base md:text-xl font-semibold">Student Admissions & Fee Details</CardTitle>
+          <CardDescription className="text-xs md:text-sm">Comprehensive list of students who have filled the admission form</CardDescription>
         </CardHeader>
         <CardContent>
           {admissions.length === 0 ? (
@@ -173,7 +173,7 @@ export default function AdminDashboardPage() {
               <p className="text-sm text-muted-foreground">No student admissions found</p>
             </div>
           ) : (
-            <div className="rounded-lg border overflow-hidden">
+            <div className="rounded-lg border overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-muted/50 border-b">
                   <tr>

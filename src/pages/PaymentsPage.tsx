@@ -298,8 +298,23 @@ export default function PaymentsPage() {
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">Total Fees</p>
-                    <p className="text-3xl font-bold">₹{paymentSummary.totalFee.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
+                    <p className="text-sm text-muted-foreground font-medium">Fee Breakdown</p>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span>Base Fee:</span>
+                        <span>₹{Number(currentAdmission.total_fee).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                      </div>
+                      {currentAdmission.discount_amount && currentAdmission.discount_amount > 0 && (
+                        <div className="flex justify-between text-xs text-orange-600 font-medium">
+                          <span>Discount:</span>
+                          <span>- ₹{Number(currentAdmission.discount_amount).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between text-base font-bold pt-1 border-t border-dashed">
+                        <span>Total Payable:</span>
+                        <span className="text-primary">₹{Number(currentAdmission.final_fee || currentAdmission.total_fee).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                      </div>
+                    </div>
                   </div>
                   <div className="space-y-1">
                     <p className="text-sm text-muted-foreground">Amount Paid</p>

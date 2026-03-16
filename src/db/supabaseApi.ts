@@ -240,7 +240,8 @@ export const supabaseApi = {
     getAllAdmissions: async (): Promise<AdmissionWithStudent[]> => {
         const { data: admissions, error } = await supabase
             .from('admissions')
-            .select('*, students(*)'); // Join with students table
+            .select('*, students(*)')
+            .order('created_at', { ascending: false });
 
         if (error) throw error;
 
@@ -254,7 +255,8 @@ export const supabaseApi = {
         const { data: admissions, error } = await supabase
             .from('admissions')
             .select('*, students(*)')
-            .eq('status', 'submitted');
+            .eq('status', 'submitted')
+            .order('created_at', { ascending: false });
 
         if (error) throw error;
 
@@ -292,6 +294,7 @@ export const supabaseApi = {
             father_email: formData.father_email || null,
             preferred_whatsapp: formData.preferred_whatsapp,
             previous_school: formData.previous_school || null,
+            language_known: formData.language_known || null,
         };
 
         const { data: student, error: studentError } = await supabase
@@ -337,11 +340,17 @@ export const supabaseApi = {
     updateAdmissionStatus: async (
         id: string,
         status: 'submitted' | 'approved' | 'rejected',
-        notes?: string
+        notes?: string,
+        discountAmount?: number,
+        finalFee?: number
     ): Promise<Admission> => {
+        const updates: any = { status, notes };
+        if (discountAmount !== undefined) updates.discount_amount = discountAmount;
+        if (finalFee !== undefined) updates.final_fee = finalFee;
+
         const { data, error } = await supabase
             .from('admissions')
-            .update({ status, notes })
+            .update(updates)
             .eq('id', id)
             .select()
             .single();
@@ -375,15 +384,29 @@ export const supabaseApi = {
             throw fetchError;
         }
 
-        // 2. Delete the admission
-        const { error } = await supabase
+        // 2. Delete all associated payments first (to avoid FK constraints)
+        const { error: paymentsError } = await supabase
+            .from('payments')
+            .delete()
+            .eq('admission_id', id);
+
+        if (paymentsError) {
+            console.error("Failed to delete associated payments:", paymentsError);
+            throw paymentsError;
+        }
+
+        // 3. Delete the admission
+        const { error: admissionError } = await supabase
             .from('admissions')
             .delete()
             .eq('id', id);
 
-        if (error) throw error;
+        if (admissionError) {
+            console.error("Failed to delete admission:", admissionError);
+            throw admissionError;
+        }
 
-        // 3. Delete the associated student
+        // 4. Delete the associated student
         if (admission && admission.student_id) {
             const { error: studentError } = await supabase
                 .from('students')
@@ -392,7 +415,7 @@ export const supabaseApi = {
 
             if (studentError) {
                 console.error("Failed to delete associated student:", studentError);
-                // We log but don't throw, as the primary action (deleting admission) succeeded
+                // We log but don't throw, as the primary actions succeeded
             }
         }
     },
@@ -442,7 +465,8 @@ export const supabaseApi = {
           *,
           students (*)
         )
-      `);
+      `)
+            .order('created_at', { ascending: false });
 
         if (error) throw error;
 
@@ -465,7 +489,8 @@ export const supabaseApi = {
           students (*)
         )
       `)
-            .eq('status', 'under_verification');
+            .eq('status', 'under_verification')
+            .order('created_at', { ascending: false });
 
         if (error) throw error;
 
@@ -542,7 +567,7 @@ export const supabaseApi = {
         // Determine total fee from admission
         const { data: admission, error: admError } = await supabase
             .from('admissions')
-            .select('total_fee')
+            .select('total_fee, final_fee')
             .eq('id', admissionId)
             .single();
 
@@ -558,7 +583,7 @@ export const supabaseApi = {
         if (payError) throw payError;
 
         const paidAmount = payments.reduce((sum: number, p: { amount: number }) => sum + Number(p.amount), 0);
-        const totalFee = Number(admission.total_fee);
+        const totalFee = Number(admission.final_fee ?? admission.total_fee);
 
         return {
             totalFee,
@@ -718,7 +743,10 @@ export const supabaseApi = {
         const upcomingEvents = await supabaseApi.getUpcomingEvents();
         const recentAnnouncements = await supabaseApi.getRecentAnnouncements(3);
 
-        const totalFees = students.reduce((sum: number, s: StudentWithAdmission) => sum + Number(s.admission?.total_fee || 0), 0);
+        const totalFees = students.reduce((sum: number, s: StudentWithAdmission) => {
+            const fee = s.admission?.final_fee ?? s.admission?.total_fee ?? 0;
+            return sum + Number(fee);
+        }, 0);
         const paidAmount = payments
             .filter((p: PaymentWithAdmission) => p.status === 'approved')
             .reduce((sum: number, p: PaymentWithAdmission) => sum + Number(p.amount), 0);
@@ -941,5 +969,50 @@ export const supabaseApi = {
             .eq('id', queryId);
 
         if (error) throw error;
+    },
+
+    // ==================== BATCH MANAGEMENT ====================
+
+    assignBatch: async (studentId: string, batchId: string, batchTime: string, batchLabel: string): Promise<Student> => {
+        const { data, error } = await supabase
+            .from('students')
+            .update({ batch_id: batchId, batch_time: batchTime, batch_label: batchLabel })
+            .eq('id', studentId)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return data;
+    },
+
+    getStudentsByBatch: async (): Promise<Array<Student & { parent?: Profile; admission?: Admission }>> => {
+        // Get all students that have an approved admission, joined with parent profile
+        const { data, error } = await supabase
+            .from('students')
+            .select(`
+                *,
+                parent:profiles!parent_id(*),
+                admissions(*)
+            `)
+            .order('full_name', { ascending: true });
+
+        if (error) throw error;
+
+        // Filter to only students with at least one approved admission
+        return (data || [])
+            .filter((s: any) => {
+                const admissions = Array.isArray(s.admissions) ? s.admissions : [];
+                return admissions.some((a: any) => a.status === 'approved');
+            })
+            .map((s: any) => {
+                const admissions = Array.isArray(s.admissions) ? s.admissions : [];
+                const approvedAdmission = admissions.find((a: any) => a.status === 'approved');
+                return {
+                    ...s,
+                    parent: s.parent,
+                    admission: approvedAdmission,
+                    admissions: undefined, // clean up the raw array
+                };
+            });
     },
 };

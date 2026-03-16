@@ -21,6 +21,7 @@ import AdminAnnouncementsPage from '@/pages/admin/AdminAnnouncementsPage';
 import AdminUsersPage from '@/pages/admin/AdminUsersPage';
 import SupportPage from '@/pages/SupportPage';
 import AdminQueriesPage from '@/pages/admin/AdminQueriesPage';
+import AdminBatchPage from '@/pages/admin/AdminBatchPage';
 
 import NotFound from '@/pages/NotFound';
 
@@ -164,6 +165,15 @@ const routes: RouteConfig[] = [
     element: (
       <AdminLayout>
         <AdminQueriesPage />
+      </AdminLayout>
+    ),
+  },
+  {
+    name: 'Admin Batches',
+    path: '/admin/batches',
+    element: (
+      <AdminLayout>
+        <AdminBatchPage />
       </AdminLayout>
     ),
   },

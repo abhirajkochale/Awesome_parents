@@ -46,7 +46,7 @@ const formSchema = z.object({
   date_of_birth: z.string().min(1, 'Date of birth is required'),
   gender: z.string().min(1, 'Gender is required'),
   class: z.string().min(1, 'Class is required'),
-  language_known: z.string(),
+  language_known: z.string().optional(),
   residential_address: z.string().min(5, 'Residential address is required'),
   correspondence_address: z.string().min(5, 'Correspondence address is required'),
   religion: z.string(),
@@ -217,6 +217,7 @@ export default function AdmissionPage() {
         father_email: data.father_email,
         preferred_whatsapp: data.preferred_whatsapp,
         previous_school: data.previous_school,
+        language_known: data.language_known,
         total_fee: finalFee,
         uploaded_files: uploadedUrls,
       });
@@ -236,7 +237,7 @@ export default function AdmissionPage() {
   };
 
   const handleFileUpload = (key: string, file: File | undefined | null) => {
-      setUploadedFiles(prev => ({ ...prev, [key]: file }));
+      setUploadedFiles(prev => ({ ...prev, [key]: file || null }));
       if (file) toast({ title: 'File selected', description: file.name });
   };
 
@@ -300,7 +301,7 @@ export default function AdmissionPage() {
                 >
                   <Icon className="w-5 h-5" />
                 </motion.div>
-                <div className="text-center">
+                <div className="text-center hidden sm:block">
                     <p className={`text-xs font-semibold ${isCurrent ? 'text-foreground' : 'text-muted-foreground'}`}>{step.title}</p>
                 </div>
               </div>

@@ -67,7 +67,7 @@ export default function AnnouncementsPage() {
 
   if (loading) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-4 md:space-y-8">
         <Skeleton className="h-10 w-64 bg-muted" />
         <div className="space-y-4">
           {[...Array(5)].map((_, i) => (
@@ -88,12 +88,12 @@ export default function AnnouncementsPage() {
       initial="hidden"
       animate="visible"
       variants={containerVariants}
-      className="space-y-8"
+      className="space-y-4 md:space-y-8"
     >
       {/* Header */}
       <motion.div variants={itemVariants} className="space-y-2">
-        <h1 className="text-4xl font-bold tracking-tight">Announcements</h1>
-        <p className="text-muted-foreground">Stay informed about school news and updates</p>
+        <h1 className="text-2xl md:text-4xl font-bold tracking-tight">Announcements</h1>
+        <p className="text-sm md:text-base text-muted-foreground">Stay informed about school news and updates</p>
       </motion.div>
 
       {announcements.length === 0 ? (
@@ -107,13 +107,13 @@ export default function AnnouncementsPage() {
           </Card>
         </motion.div>
       ) : (
-        <div className="space-y-8">
+        <div className="space-y-4 md:space-y-8">
           {/* High Priority Announcements */}
           {highPriority.length > 0 && (
             <div className="space-y-4">
               <motion.div variants={itemVariants} className="flex items-center gap-2">
                 <AlertCircle className="h-5 w-5 text-red-600" />
-                <h2 className="text-lg font-semibold">Important - Requires Action</h2>
+                <h2 className="text-base md:text-lg font-semibold">Important - Requires Action</h2>
               </motion.div>
               <div className="space-y-3">
                 {highPriority.map((announcement) => (
@@ -122,7 +122,7 @@ export default function AnnouncementsPage() {
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between gap-4">
                           <div className="space-y-2 flex-1">
-                            <CardTitle className="text-lg">{announcement.title}</CardTitle>
+                            <CardTitle className="text-base md:text-lg">{announcement.title}</CardTitle>
                             <p className="text-sm text-muted-foreground">
                               {format(new Date(announcement.announcement_date), 'EEEE, MMMM d, yyyy')}
                             </p>
@@ -145,7 +145,7 @@ export default function AnnouncementsPage() {
             <div className="space-y-4">
               <motion.div variants={itemVariants} className="flex items-center gap-2">
                 <Bell className="h-5 w-5 text-blue-600" />
-                <h2 className="text-lg font-semibold">General Announcements</h2>
+                <h2 className="text-base md:text-lg font-semibold">General Announcements</h2>
               </motion.div>
               <motion.div 
                 variants={containerVariants}
@@ -180,7 +180,7 @@ export default function AnnouncementsPage() {
             <div className="space-y-4">
               <motion.div variants={itemVariants} className="flex items-center gap-2">
                 <Bell className="h-5 w-5 text-gray-500" />
-                <h2 className="text-lg font-semibold">Other Updates</h2>
+                <h2 className="text-base md:text-lg font-semibold">Other Updates</h2>
               </motion.div>
               <motion.div 
                 variants={containerVariants}

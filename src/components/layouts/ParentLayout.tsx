@@ -27,6 +27,8 @@ import { ThemeToggle } from '@/components/common/ThemeToggle';
 import { BrandLoader } from '@/components/common/BrandLoader';
 import { NotificationBell } from '@/components/common/NotificationBell';
 import { PlayfulBackground } from '@/components/common/PlayfulBackground';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from '@/components/ui/sheet';
+import { Menu } from 'lucide-react';
 
 interface ParentLayoutProps {
     children: React.ReactNode;
@@ -92,32 +94,6 @@ export default function ParentLayout({ children }: ParentLayoutProps) {
                     </Link>
                 );
             })}
-        </nav>
-    );
-
-    const MobileBottomNav = () => (
-        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background border-t pb-safe">
-            <div className="flex items-center justify-around p-2">
-                {parentNavItems.slice(0, 5).map((item) => {
-                    const Icon = item.icon;
-                    const isActive = location.pathname === item.path;
-                    return (
-                        <Link
-                            key={item.path}
-                            to={item.path}
-                            className={cn(
-                                'flex flex-col items-center justify-center w-full py-1 min-w-[64px]',
-                                isActive ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
-                            )}
-                        >
-                            <Icon className="h-6 w-6 mb-1" strokeWidth={isActive ? 2.5 : 2} />
-                            <span className="text-[10px] font-medium truncate w-full text-center">
-                                {item.label.split(' ')[0]} {/* Keep it extremely short */}
-                            </span>
-                        </Link>
-                    );
-                })}
-            </div>
         </nav>
     );
 
@@ -196,6 +172,28 @@ export default function ParentLayout({ children }: ParentLayoutProps) {
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
+
+                            <Sheet>
+                                <SheetTrigger asChild>
+                                    <Button variant="ghost" size="icon">
+                                        <Menu className="h-5 w-5" />
+                                    </Button>
+                                </SheetTrigger>
+                                <SheetContent side="left" className="w-64 p-0">
+                                    <div className="p-4 border-b flex flex-col items-center justify-center bg-muted/10">
+                                        <Link to="/" className="flex items-center w-full justify-center px-4">
+                                            <img src="/AwesomeKids_logo.jpeg" alt="AwesomeKids" className="w-full h-auto object-contain" />
+                                        </Link>
+                                    </div>
+                                    <SheetHeader className="sr-only">
+                                        <SheetTitle>Navigation Menu</SheetTitle>
+                                        <SheetDescription>Mobile navigation links</SheetDescription>
+                                    </SheetHeader>
+                                    <div className="py-4">
+                                        <NavLinks mobile />
+                                    </div>
+                                </SheetContent>
+                            </Sheet>
                         </div>
                     </div>
                 </header>
@@ -254,7 +252,6 @@ export default function ParentLayout({ children }: ParentLayoutProps) {
                     <div className="container mx-auto p-4 md:p-8 max-w-7xl">{children}</div>
                 </main>
             </div>
-            <MobileBottomNav />
             <ProfileSettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
         </div>
     );

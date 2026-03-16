@@ -69,10 +69,10 @@ export default function EventsPage() {
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between gap-3">
               <div className="space-y-2 flex-1">
-                <CardTitle className="text-xl">{event.title}</CardTitle>
+                <CardTitle className="text-base md:text-xl">{event.title}</CardTitle>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Calendar className="h-4 w-4 flex-shrink-0" />
-                  <span>{format(eventDate, 'EEEE, MMMM d, yyyy')}</span>
+                  <span className="text-xs md:text-sm">{format(eventDate, 'EEEE, MMMM d, yyyy')}</span>
                 </div>
               </div>
               <Badge variant={isUpcoming ? 'default' : 'secondary'} className="flex-shrink-0">
@@ -80,8 +80,8 @@ export default function EventsPage() {
               </Badge>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-muted-foreground leading-relaxed line-clamp-3">{event.description}</p>
+          <CardContent className="space-y-3 md:space-y-4">
+            <p className="text-sm md:text-base text-muted-foreground leading-relaxed line-clamp-3">{event.description}</p>
             {event.photos && event.photos.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2 pt-2">
                 {event.photos.map((photo, idx) => (
@@ -105,7 +105,7 @@ export default function EventsPage() {
 
   if (loading) {
     return (
-      <div className="space-y-8">
+      <div className="space-y-4 md:space-y-8">
         <Skeleton className="h-10 w-64 bg-muted" />
         <Skeleton className="h-12 w-96 bg-muted rounded-lg" />
         <div className="grid gap-6">
@@ -122,12 +122,12 @@ export default function EventsPage() {
       initial="hidden"
       animate="visible"
       variants={containerVariants}
-      className="space-y-8"
+      className="space-y-4 md:space-y-8"
     >
       {/* Header */}
       <motion.div variants={itemVariants} className="space-y-2">
-        <h1 className="text-4xl font-bold tracking-tight">School Events</h1>
-        <p className="text-muted-foreground">Stay updated with school activities and celebrations</p>
+        <h1 className="text-2xl md:text-4xl font-bold tracking-tight">School Events</h1>
+        <p className="text-sm md:text-base text-muted-foreground">Stay updated with school activities and celebrations</p>
       </motion.div>
 
       <motion.div variants={itemVariants}>
@@ -155,7 +155,7 @@ export default function EventsPage() {
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6"
               >
                 {upcomingEvents.map((event) => (
                   <EventCard key={event.id} event={event} />
@@ -176,7 +176,7 @@ export default function EventsPage() {
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6"
               >
                 {pastEvents.map((event) => (
                   <EventCard key={event.id} event={event} />

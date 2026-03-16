@@ -21,6 +21,7 @@ import {
     Calendar,
     Bell,
     MessageSquare,
+    GraduationCap,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import React, { useState } from 'react';
@@ -36,6 +37,7 @@ interface AdminLayoutProps {
 const adminNavItems = [
     { path: '/admin', label: 'Dashboard', icon: Settings },
     { path: '/admin/admissions', label: 'Admissions', icon: CheckCircle },
+    { path: '/admin/batches', label: 'Batches', icon: GraduationCap },
     { path: '/admin/payments', label: 'Payments', icon: DollarSign },
     { path: '/admin/events', label: 'Events', icon: Calendar },
     { path: '/admin/announcements', label: 'Announcements', icon: Bell },

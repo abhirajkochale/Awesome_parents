@@ -73,3 +73,8 @@ export const storageApi = {
   uploadReceipt: supabaseApi.uploadReceipt,
   uploadEventPhotos: supabaseApi.uploadEventPhotos,
 };
+
+export const batchApi = {
+  assignBatch: supabaseApi.assignBatch,
+  getStudentsByBatch: supabaseApi.getStudentsByBatch,
+};

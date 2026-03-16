@@ -12,27 +12,82 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// Mock notifications for now since there's no dedicated notifications table yet
-const MOCK_NOTIFICATIONS = [
-  { id: 1, text: 'Fee payment reminder: Installment 2 due soon.', time: '2h ago', read: false },
-  { id: 2, text: 'New announcement: Annual Sports Day scheduled next month.', time: '1d ago', read: false },
-  { id: 3, text: 'Your recent support query has been answered.', time: '2d ago', read: true },
-];
+import { useAuth } from '@/contexts/AuthContext';
+import { dashboardApi } from '@/db/api';
+import { useNavigate } from 'react-router-dom';
 
 export function NotificationBell() {
-  const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
+  const { profile } = useAuth();
+  const navigate = useNavigate();
+  const [notifications, setNotifications] = useState<{id: string, text: string, time: string, read: boolean, link?: string}[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    async function loadNotifications() {
+      if (!profile) return;
+      
+      try {
+        const readIds: string[] = JSON.parse(localStorage.getItem('read_notifications') || '[]');
+        const newNotifs: {id: string, text: string, time: string, read: boolean, link?: string}[] = [];
+
+        if (profile.role === 'admin') {
+            const data = await dashboardApi.getAdminDashboard();
+            if (data.pendingAdmissions > 0) {
+               newNotifs.push({ id: `admin-adm-${data.pendingAdmissions}`, text: `You have ${data.pendingAdmissions} pending admissions to review.`, time: 'System Alert', read: readIds.includes(`admin-adm-${data.pendingAdmissions}`), link: '/admin/admissions' });
+            }
+            if (data.pendingPayments > 0) {
+               newNotifs.push({ id: `admin-pay-${data.pendingPayments}`, text: `You have ${data.pendingPayments} payments waiting for verification.`, time: 'System Alert', read: readIds.includes(`admin-pay-${data.pendingPayments}`), link: '/admin/payments' });
+            }
+        } else {
+            const data = await dashboardApi.getParentDashboard();
+            if (data.remainingBalance > 0) {
+               newNotifs.push({ id: `parent-fee-${data.remainingBalance}`, text: `You have a pending fee balance of ₹${data.remainingBalance.toLocaleString()}.`, time: 'Action Required', read: readIds.includes(`parent-fee-${data.remainingBalance}`), link: '/payments' });
+            }
+            if (data.recentAnnouncements && data.recentAnnouncements.length > 0) {
+               data.recentAnnouncements.slice(0, 3).forEach(ann => {
+                   newNotifs.push({ id: `ann-${ann.id}`, text: `Announcement: ${ann.title}`, time: new Date(ann.created_at).toLocaleDateString(), read: readIds.includes(`ann-${ann.id}`) });
+               });
+            }
+            if (data.upcomingEvents && data.upcomingEvents.length > 0) {
+               const nextEvent = data.upcomingEvents[0];
+               newNotifs.push({ id: `evt-${nextEvent.id}`, text: `Upcoming Event: ${nextEvent.title}`, time: new Date(nextEvent.event_date).toLocaleDateString(), read: readIds.includes(`evt-${nextEvent.id}`), link: '/dashboard' });
+            }
+        }
+        
+        if (newNotifs.length === 0) {
+            newNotifs.push({ id: 'welcome', text: 'Welcome to Awesome Parents Portal!', time: 'Just now', read: readIds.includes('welcome') });
+        }
+        
+        setNotifications(newNotifs);
+      } catch (err) {
+        console.error("Failed to load notifications", err);
+      }
+    }
+    loadNotifications();
+  }, [profile]);
 
   useEffect(() => {
     setUnreadCount(notifications.filter(n => !n.read).length);
   }, [notifications]);
 
-  const markAllAsRead = () => {
-    setNotifications(notifications.map(n => ({ ...n, read: true })));
+  const saveReadState = (ids: string[]) => {
+      localStorage.setItem('read_notifications', JSON.stringify(ids));
   };
 
-  const markAsRead = (id: number) => {
-    setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n));
+  const markAllAsRead = () => {
+    const updated = notifications.map(n => ({ ...n, read: true }));
+    setNotifications(updated);
+    saveReadState(updated.map(n => n.id));
+  };
+
+  const markAsRead = (id: string, link?: string) => {
+    const updated = notifications.map(n => n.id === id ? { ...n, read: true } : n);
+    setNotifications(updated);
+    saveReadState(updated.filter(n => n.read).map(n => n.id));
+    
+    if (link) {
+        navigate(link);
+    }
   };
 
   return (
@@ -74,7 +129,10 @@ export function NotificationBell() {
               <DropdownMenuItem 
                 key={notification.id} 
                 className={`flex flex-col items-start gap-1 p-3 cursor-pointer ${notification.read ? 'opacity-70' : 'bg-primary/5'}`}
-                onClick={() => markAsRead(notification.id)}
+                onClick={(e) => {
+                  e.preventDefault(); // Prevents dropdown from immediately closing before state updates if click is internal
+                  markAsRead(notification.id, notification.link);
+                }}
               >
                 <div className="flex items-start justify-between w-full gap-2">
                     <span className="text-sm leading-tight">{notification.text}</span>
