@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { profileApi } from '@/db/api';
-import type { Profile } from '@/types';
+import type { Profile, UserRole } from '@/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -44,7 +44,7 @@ export default function AdminUsersPage() {
     }
   };
 
-  const handleRoleChange = async (userId: string, newRole: 'parent' | 'admin') => {
+  const handleRoleChange = async (userId: string, newRole: UserRole) => {
     try {
       await profileApi.updateUserRole(userId, newRole);
       toast({
@@ -131,7 +131,7 @@ export default function AdminUsersPage() {
                     </Badge>
                     <Select
                       value={user.role}
-                      onValueChange={(value: 'parent' | 'admin') =>
+                      onValueChange={(value: UserRole) =>
                         handleRoleChange(user.id, value)
                       }
                       disabled={user.id === currentUser?.id}
@@ -141,6 +141,7 @@ export default function AdminUsersPage() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="parent">Parent</SelectItem>
+                        <SelectItem value="teacher">Teacher</SelectItem>
                         <SelectItem value="admin">Admin</SelectItem>
                       </SelectContent>
                     </Select>

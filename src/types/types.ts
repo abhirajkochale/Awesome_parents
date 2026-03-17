@@ -1,6 +1,6 @@
 // Database types matching Supabase schema
 
-export type UserRole = 'parent' | 'admin';
+export type UserRole = 'parent' | 'admin' | 'teacher';
 
 export type AdmissionStatus = 'submitted' | 'approved' | 'rejected';
 

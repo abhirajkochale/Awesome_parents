@@ -17,6 +17,7 @@ import type {
     AnnouncementFormData,
     HelpQuery,
     QueryFormData,
+    UserRole,
 } from '@/types';
 
 // Helper to get current user ID
@@ -84,7 +85,7 @@ export const supabaseApi = {
         return data;
     },
 
-    updateUserRole: async (userId: string, role: 'parent' | 'admin'): Promise<void> => {
+    updateUserRole: async (userId: string, role: UserRole): Promise<void> => {
         const { error } = await supabase
             .from('profiles')
             .update({ role })
