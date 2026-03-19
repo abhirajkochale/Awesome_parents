@@ -19,7 +19,7 @@ import { AdmissionDetailsDialog } from '@/components/admin/AdmissionDetailsDialo
 import { AdminEditAdmissionDialog } from '@/components/admin/AdminEditAdmissionDialog';
 import { format } from 'date-fns';
 import { getBatchesForStandard, STANDARDS, STANDARD_LABELS, STANDARD_STYLES } from '@/lib/batchConfig';
-import { Baby, Flower2, Palette, BookOpen, GraduationCap, CheckCircle, XCircle, Eye, Trash2, Edit, Clock } from 'lucide-react';
+import { Baby, Flower2, Palette, BookOpen, GraduationCap, CheckCircle, XCircle, Eye, Trash2, Edit, Clock, Download, Loader2, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Select,
@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { exportStudentRegister } from '@/lib/exportStudentRegister';
 
 export default function AdminAdmissionsPage() {
   const [admissions, setAdmissions] = useState<AdmissionWithStudent[]>([]);
@@ -39,6 +40,8 @@ export default function AdminAdmissionsPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [selectedBatch, setSelectedBatch] = useState<string>('');
   const [discountAmount, setDiscountAmount] = useState<string>('0');
+  const [isExporting, setIsExporting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -153,15 +156,54 @@ export default function AdminAdmissionsPage() {
     }
   };
 
+  const handleExportExcel = async () => {
+    try {
+      setIsExporting(true);
+      await exportStudentRegister();
+      toast({ title: 'Success', description: 'Student register downloaded successfully' });
+    } catch (err) {
+      console.error(err);
+      toast({ title: 'Error', description: 'Failed to export student register', variant: 'destructive' });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   if (loading) {
     return <Skeleton className="h-96 bg-muted" />;
   }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl md:text-3xl font-bold">Manage Admissions</h1>
-        <p className="text-muted-foreground">Review and approve admission applications</p>
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h1 className="text-xl md:text-3xl font-bold">Manage Admissions</h1>
+          <p className="text-muted-foreground">Review and approve admission applications</p>
+        </div>
+        <Button
+          onClick={handleExportExcel}
+          disabled={isExporting}
+          variant="outline"
+          className="gap-2"
+        >
+          {isExporting ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Download className="h-4 w-4" />
+          )}
+          {isExporting ? 'Exporting...' : 'Download Excel'}
+        </Button>
+      </div>
+
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search by student name, class, or status..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9"
+        />
       </div>
 
       {admissions.length === 0 ? (
@@ -177,9 +219,15 @@ export default function AdminAdmissionsPage() {
           const iconMap: Record<string, any> = { Baby, Flower2, Palette, BookOpen, GraduationCap };
           const IconComponent = iconMap[styles?.icon || 'GraduationCap'] || GraduationCap;
           
-          const filtered = admissions.filter(
-            (a) => (a.student?.class || '').toLowerCase() === std
-          );
+          const query = searchQuery.toLowerCase().trim();
+          const filtered = admissions.filter((a) => {
+            if ((a.student?.class || '').toLowerCase() !== std) return false;
+            if (!query) return true;
+            const name = (a.student?.full_name || '').toLowerCase();
+            const cls = (a.student?.class || '').toLowerCase();
+            const status = (a.status || '').toLowerCase();
+            return name.includes(query) || cls.includes(query) || status.includes(query);
+          });
 
           return (
             <Card key={std} className={cn("overflow-hidden border-2", styles?.borderColor || "border-muted")}>
