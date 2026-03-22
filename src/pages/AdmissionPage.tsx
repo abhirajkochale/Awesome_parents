@@ -243,20 +243,20 @@ export default function AdmissionPage() {
 
   const FileUploader = ({ id, label, keyName, accept = "image/*" }: { id: string, label: string, keyName: string, accept?: string }) => (
     <div
-      className="flex flex-col items-center justify-center border-2 border-dashed border-outline-variant rounded-xl p-8 hover:border-primary hover:bg-primary/5 cursor-pointer transition-all duration-200 bg-surface"
+      className="flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-6 hover:border-primary hover:bg-primary/5 cursor-pointer transition-all duration-200"
       onClick={() => document.getElementById(id)?.click()}
     >
       {uploadedFiles[keyName] ? (
           <>
-              <span className="material-symbols-outlined text-4xl text-green-500 mb-3">check_circle</span>
-              <p className="text-base font-bold text-green-700 max-w-full truncate px-2">{uploadedFiles[keyName]?.name}</p>
-              <p className="text-sm text-on-surface-variant mt-1 font-medium">Click to replace</p>
+              <CheckCircle className="h-8 w-8 text-green-500 mb-2" />
+              <p className="text-sm font-medium text-green-700 max-w-full truncate px-2">{uploadedFiles[keyName]?.name}</p>
+              <p className="text-xs text-muted-foreground mt-1">Click to replace</p>
           </>
       ) : (
           <>
-            <span className="material-symbols-outlined text-4xl text-outline mb-3">upload_file</span>
-            <p className="text-base font-bold text-slate-700">{label}</p>
-            <p className="text-sm text-on-surface-variant mt-1 font-medium">Click to browse & upload</p>
+            <Upload className="h-8 w-8 text-muted-foreground mb-3" />
+            <p className="text-sm font-medium">{label}</p>
+            <p className="text-xs text-muted-foreground mt-1">Click to upload</p>
           </>
       )}
       <input
@@ -269,44 +269,41 @@ export default function AdmissionPage() {
     </div>
   );
 
-  const inputClasses = "w-full bg-surface border-none shadow-none rounded-md px-5 h-[56px] text-slate-900 focus-visible:ring-2 focus-visible:ring-primary/20 font-medium placeholder:text-slate-400";
-  const textareaClasses = "w-full bg-surface border-none shadow-none rounded-md px-5 py-4 text-slate-900 focus-visible:ring-2 focus-visible:ring-primary/20 font-medium placeholder:text-slate-400 resize-none h-32";
-  const selectTriggerClasses = "w-full bg-surface border-none shadow-none rounded-md px-5 h-[56px] text-slate-900 focus:ring-2 focus:ring-primary/20 font-medium";
-
   return (
-    <div className="p-4 md:p-8 lg:p-12 max-w-5xl mx-auto w-full font-sans">
+    <div className="max-w-4xl mx-auto space-y-8 pb-12 pt-4">
       
-      {/* Horizontal Progress Stepper */}
-      <div className="mb-12">
-        <div className="flex items-center justify-between relative px-4">
-          <div className="absolute top-7 left-0 w-full h-1 bg-surface-container-high -translate-y-1/2 -z-10 rounded-full shrink-0"></div>
-          <motion.div 
-            className="absolute top-7 left-0 h-1 bg-primary-container -translate-y-1/2 -z-10 rounded-full"
-            initial={{ width: '0%' }}
-            animate={{ width: `${((currentStep - 1) / (STEPS.length - 1)) * 100}%` }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
-          ></motion.div>
-
+      {/* Step Progress Indicator */}
+      <div className="relative mb-8">
+        <div className="absolute top-5 left-8 right-8 h-1 bg-muted rounded-full">
+            <motion.div 
+                className="absolute top-0 left-0 h-full bg-primary rounded-full"
+                initial={{ width: '0%' }}
+                animate={{ width: `${((currentStep - 1) / (STEPS.length - 1)) * 100}%` }}
+                transition={{ duration: 0.4, ease: "easeInOut" }}
+            />
+        </div>
+        
+        <div className="relative flex justify-between">
           {STEPS.map((step) => {
             const isCompleted = currentStep > step.id;
             const isCurrent = currentStep === step.id;
-            let iconText = "";
-            if (step.id === 1) iconText = "child_care";
-            if (step.id === 2) iconText = "family_restroom";
-            if (step.id === 3) iconText = "description";
-            if (step.id === 4) iconText = "verified";
-
-            let bgClass = "bg-white text-slate-400 border-4 border-surface-container-high";
-            if (isCurrent || isCompleted) bgClass = "bg-primary-container text-white shadow-lg shadow-blue-200 border-none";
-
+            const Icon = step.icon;
+            
             return (
-              <div key={step.id} className="flex flex-col items-center gap-3">
-                <div className={`w-14 h-14 rounded-full flex items-center justify-center ring-8 ring-[#f8f9fa] transition-all duration-300 ${bgClass} shrink-0`}>
-                  <span className="material-symbols-outlined text-2xl">{iconText}</span>
+              <div key={step.id} className="flex flex-col items-center gap-2 z-10 w-24">
+                <motion.div 
+                    animate={{ 
+                        backgroundColor: isCompleted || isCurrent ? 'hsl(var(--primary))' : 'hsl(var(--muted))',
+                        color: isCompleted || isCurrent ? 'hsl(var(--primary-foreground))' : 'hsl(var(--muted-foreground))',
+                        scale: isCurrent ? 1.15 : 1
+                    }}
+                    className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm border-2 border-background"
+                >
+                  <Icon className="w-5 h-5" />
+                </motion.div>
+                <div className="text-center hidden sm:block">
+                    <p className={`text-xs font-semibold ${isCurrent ? 'text-foreground' : 'text-muted-foreground'}`}>{step.title}</p>
                 </div>
-                <span className={`text-sm font-bold hidden md:block ${isCurrent || isCompleted ? 'text-primary' : 'text-slate-400'}`}>
-                  {step.title}
-                </span>
               </div>
             );
           })}
@@ -314,7 +311,7 @@ export default function AdmissionPage() {
       </div>
 
       {error && (
-        <Alert variant="destructive" className="mb-8 rounded-xl border-none font-medium">
+        <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
@@ -323,237 +320,199 @@ export default function AdmissionPage() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <AnimatePresence mode="wait">
             {currentStep === 1 && (
-              <motion.div key="step1" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}>
-                <section className="bg-surface-container-lowest rounded-2xl p-6 md:p-10 shadow-[0_8px_32px_rgba(0,0,0,0.06)] border border-white/50">
-                  <header className="flex flex-col md:flex-row md:items-center gap-6 mb-10 pb-8 border-b border-surface-container-low">
-                    <div className="w-16 h-16 rounded-2xl bg-primary-fixed flex items-center justify-center shrink-0">
-                      <span className="material-symbols-outlined text-primary text-4xl">face_6</span>
+              <motion.div key="step1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
+                <Card className="shadow-md border-border/50 overflow-hidden">
+                  <div className="bg-primary/5 border-b p-6">
+                    <CardTitle className="text-2xl font-bold flex items-center gap-2">
+                        <User className="h-6 w-6 text-primary" /> Child Information
+                    </CardTitle>
+                    <CardDescription className="text-base mt-1">Enter the core details of the student seeking admission.</CardDescription>
+                  </div>
+                  <CardContent className="space-y-6 pt-6 grid grid-cols-1">
+                    
+                    <div className="grid md:grid-cols-2 gap-6">
+                        <FormField control={form.control} name="academic_year" render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Academic Year *</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value || "2026-2027"}>
+                            <FormControl><SelectTrigger><SelectValue/></SelectTrigger></FormControl>
+                            <SelectContent>
+                                <SelectItem value="2025-2026">2025-2026</SelectItem>
+                                <SelectItem value="2026-2027">2026-2027</SelectItem>
+                                <SelectItem value="2027-2028">2027-2028</SelectItem>
+                            </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                        )} />
+                        
+                        <FormField control={form.control} name="class" render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Class *</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl><SelectTrigger><SelectValue placeholder="Select class"/></SelectTrigger></FormControl>
+                            <SelectContent>
+                                <SelectItem value="playgroup">Playgroup - ₹20,000</SelectItem>
+                                <SelectItem value="nursery">Nursery - ₹25,000</SelectItem>
+                                <SelectItem value="lkg">L.K.G. - ₹30,000</SelectItem>
+                                <SelectItem value="ukg">U.K.G. - ₹35,000</SelectItem>
+                            </SelectContent>
+                            </Select>
+                            <FormMessage />
+                        </FormItem>
+                        )} />
                     </div>
-                    <div>
-                      <h2 className="text-2xl lg:text-3xl font-['Plus_Jakarta_Sans'] font-bold text-slate-900 leading-tight">Child Information</h2>
-                      <p className="text-on-surface-variant font-medium mt-1">Enter the core details of the student seeking admission.</p>
+
+                    <div className="grid md:grid-cols-3 gap-6">
+                        <FormField control={form.control} name="student_first_name" render={({ field }) => (
+                            <FormItem><FormLabel>First Name *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                        <FormField control={form.control} name="student_middle_name" render={({ field }) => (
+                            <FormItem><FormLabel>Middle Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                        <FormField control={form.control} name="student_last_name" render={({ field }) => (
+                            <FormItem><FormLabel>Last Name *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
                     </div>
-                  </header>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-6 gap-6 lg:gap-8">
-                    <FormField control={form.control} name="academic_year" render={({ field }) => (
-                      <FormItem className="md:col-span-3">
-                        <FormLabel className="text-sm font-bold text-slate-700 px-1">Academic Year *</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl><SelectTrigger className={selectTriggerClasses}><SelectValue placeholder="Select Year"/></SelectTrigger></FormControl>
-                          <SelectContent><SelectItem value="2025-2026">2025-2026</SelectItem><SelectItem value="2026-2027">2026-2027</SelectItem><SelectItem value="2027-2028">2027-2028</SelectItem></SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-                    <FormField control={form.control} name="class" render={({ field }) => (
-                      <FormItem className="md:col-span-3">
-                        <FormLabel className="text-sm font-bold text-slate-700 px-1">Class *</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl><SelectTrigger className={selectTriggerClasses}><SelectValue placeholder="Select class"/></SelectTrigger></FormControl>
-                          <SelectContent><SelectItem value="playgroup">Playgroup - ₹20,000</SelectItem><SelectItem value="nursery">Nursery - ₹25,000</SelectItem><SelectItem value="lkg">L.K.G. - ₹30,000</SelectItem><SelectItem value="ukg">U.K.G. - ₹35,000</SelectItem></SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
 
-                    <FormField control={form.control} name="student_first_name" render={({ field }) => (
-                      <FormItem className="md:col-span-2">
-                        <FormLabel className="text-sm font-bold text-slate-700 px-1">First Name *</FormLabel>
-                        <FormControl><Input className={inputClasses} placeholder="e.g. Advik" {...field} /></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-                    <FormField control={form.control} name="student_middle_name" render={({ field }) => (
-                      <FormItem className="md:col-span-2">
-                        <FormLabel className="text-sm font-bold text-slate-700 px-1">Middle Name</FormLabel>
-                        <FormControl><Input className={inputClasses} placeholder="Father's name" {...field} /></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-                    <FormField control={form.control} name="student_last_name" render={({ field }) => (
-                      <FormItem className="md:col-span-2">
-                        <FormLabel className="text-sm font-bold text-slate-700 px-1">Last Name *</FormLabel>
-                        <FormControl><Input className={inputClasses} placeholder="Surname" {...field} /></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
+                    <div className="grid md:grid-cols-2 gap-6">
+                        <FormField control={form.control} name="date_of_birth" render={({ field }) => (
+                            <FormItem><FormLabel>Date of Birth *</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                        <FormField control={form.control} name="gender" render={({ field }) => (
+                            <FormItem>
+                            <FormLabel>Gender *</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl><SelectTrigger><SelectValue placeholder="Select gender"/></SelectTrigger></FormControl>
+                                <SelectContent>
+                                <SelectItem value="male">Male</SelectItem>
+                                <SelectItem value="female">Female</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <FormMessage />
+                            </FormItem>
+                        )} />
+                    </div>
 
-                    <FormField control={form.control} name="date_of_birth" render={({ field }) => (
-                      <FormItem className="md:col-span-3">
-                        <FormLabel className="text-sm font-bold text-slate-700 px-1">Date of Birth *</FormLabel>
-                        <FormControl><Input type="date" className={inputClasses} {...field} /></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-                    <FormField control={form.control} name="gender" render={({ field }) => (
-                      <FormItem className="md:col-span-3">
-                        <FormLabel className="text-sm font-bold text-slate-700 px-1">Gender *</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl><SelectTrigger className={selectTriggerClasses}><SelectValue placeholder="Select gender"/></SelectTrigger></FormControl>
-                          <SelectContent><SelectItem value="male">Male</SelectItem><SelectItem value="female">Female</SelectItem><SelectItem value="other">Other</SelectItem></SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-
-                    <FormField control={form.control} name="religion" render={({ field }) => (
-                      <FormItem className="md:col-span-3">
-                        <FormLabel className="text-sm font-bold text-slate-700 px-1">Religion</FormLabel>
-                        <FormControl><Input className={inputClasses} placeholder="e.g. Hinduism" {...field} /></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-                    <FormField control={form.control} name="caste" render={({ field }) => (
-                      <FormItem className="md:col-span-3">
-                        <FormLabel className="text-sm font-bold text-slate-700 px-1">Caste</FormLabel>
-                        <FormControl><Input className={inputClasses} placeholder="e.g. General" {...field} /></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
+                    <div className="grid md:grid-cols-2 gap-6">
+                        <FormField control={form.control} name="religion" render={({ field }) => (
+                            <FormItem><FormLabel>Religion</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                        <FormField control={form.control} name="caste" render={({ field }) => (
+                            <FormItem><FormLabel>Caste</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                    </div>
                     
                     <FormField control={form.control} name="language_known" render={({ field }) => (
-                      <FormItem className="md:col-span-6">
-                        <FormLabel className="text-sm font-bold text-slate-700 px-1">Mother Tongue / Languages Known</FormLabel>
-                        <FormControl><Input className={inputClasses} placeholder="e.g. English, Hindi" {...field} /></FormControl>
-                        <FormMessage />
-                      </FormItem>
+                        <FormItem><FormLabel>Mother Tongue / Languages Known</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
 
-                    <FormField control={form.control} name="residential_address" render={({ field }) => (
-                      <FormItem className="md:col-span-3">
-                        <FormLabel className="text-sm font-bold text-slate-700 px-1">Residential Address *</FormLabel>
-                        <FormControl><Textarea className={textareaClasses} placeholder="Full residential address" {...field} /></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-                    <FormField control={form.control} name="correspondence_address" render={({ field }) => (
-                      <FormItem className="md:col-span-3">
-                        <FormLabel className="text-sm font-bold text-slate-700 px-1">Correspondence Address *</FormLabel>
-                        <FormControl><Textarea className={textareaClasses} placeholder="If same as above, type 'Same'" {...field} /></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
+                    <div className="grid md:grid-cols-2 gap-6">
+                        <FormField control={form.control} name="residential_address" render={({ field }) => (
+                            <FormItem><FormLabel>Residential Address *</FormLabel><FormControl><Textarea className="resize-none h-24" {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                        <FormField control={form.control} name="correspondence_address" render={({ field }) => (
+                            <FormItem><FormLabel>Correspondence Address *</FormLabel><FormControl><Textarea className="resize-none h-24" {...field} /></FormControl><FormMessage /></FormItem>
+                        )} />
+                    </div>
 
-                  </div>
-                </section>
+                  </CardContent>
+                </Card>
               </motion.div>
             )}
 
             {currentStep === 2 && (
-              <motion.div key="step2" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}>
-                <section className="bg-surface-container-lowest rounded-2xl p-6 md:p-10 shadow-[0_8px_32px_rgba(0,0,0,0.06)] border border-white/50">
-                  <header className="flex flex-col md:flex-row md:items-center gap-6 mb-10 pb-8 border-b border-surface-container-low">
-                    <div className="w-16 h-16 rounded-2xl bg-secondary-fixed flex items-center justify-center shrink-0">
-                      <span className="material-symbols-outlined text-secondary text-4xl">diversity_3</span>
-                    </div>
-                    <div>
-                      <h2 className="text-2xl lg:text-3xl font-['Plus_Jakarta_Sans'] font-bold text-slate-900 leading-tight">Parents & Emergency Contact</h2>
-                      <p className="text-on-surface-variant font-medium mt-1">Provide contact details for parents and an emergency contact.</p>
-                    </div>
-                  </header>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-6 gap-6 lg:gap-8">
+              <motion.div key="step2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
+                <Card className="shadow-md border-border/50 overflow-hidden">
+                  <div className="bg-primary/5 border-b p-6">
+                    <CardTitle className="text-2xl font-bold flex items-center gap-2">
+                        <Users className="h-6 w-6 text-primary" /> Parents & Emergency Contact
+                    </CardTitle>
+                    <CardDescription className="text-base mt-1">Provide contact details for parents and an emergency contact.</CardDescription>
+                  </div>
+                  <CardContent className="space-y-8 pt-6">
                     
-                    {/* Father */}
-                    <div className="md:col-span-3 space-y-6">
-                        <h3 className="font-bold text-lg text-slate-800 flex items-center gap-3 pb-2">
-                          <span className="material-symbols-outlined text-primary text-2xl">man</span> Father's Details
-                        </h3>
-                        <FormField control={form.control} name="father_phone" render={({ field }) => (
-                            <FormItem><FormLabel className="text-sm font-bold text-slate-700 px-1">Phone Number *</FormLabel><FormControl><Input className={inputClasses} placeholder="e.g. 9876543210" {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                        <FormField control={form.control} name="father_email" render={({ field }) => (
-                            <FormItem><FormLabel className="text-sm font-bold text-slate-700 px-1">Email Address</FormLabel><FormControl><Input type="email" className={inputClasses} placeholder="father@example.com" {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                    </div>
-                    
-                    {/* Mother */}
-                    <div className="md:col-span-3 space-y-6">
-                        <h3 className="font-bold text-lg text-slate-800 flex items-center gap-3 pb-2">
-                          <span className="material-symbols-outlined text-secondary text-2xl">woman</span> Mother's Details
-                        </h3>
-                        <FormField control={form.control} name="mother_phone" render={({ field }) => (
-                            <FormItem><FormLabel className="text-sm font-bold text-slate-700 px-1">Phone Number *</FormLabel><FormControl><Input className={inputClasses} placeholder="e.g. 9876543210" {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                        <FormField control={form.control} name="mother_email" render={({ field }) => (
-                            <FormItem><FormLabel className="text-sm font-bold text-slate-700 px-1">Email Address</FormLabel><FormControl><Input type="email" className={inputClasses} placeholder="mother@example.com" {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
-                    </div>
-
-                    <div className="md:col-span-6 p-6 md:p-8 rounded-2xl bg-green-50 mt-4 border border-green-100 flex flex-col md:flex-row md:items-center gap-6 md:gap-12">
-                        <div className="shrink-0 flex items-center gap-4">
-                           <div className="w-12 h-12 rounded-full bg-green-200 flex items-center justify-center shrink-0">
-                               <span className="material-symbols-outlined text-green-700">chat</span>
-                           </div>
-                           <div>
-                             <h4 className="font-bold text-green-900 text-lg">Primary Comms</h4>
-                             <p className="text-sm font-medium text-green-800 mt-1">Updates sent here</p>
-                           </div>
+                    <div className="grid md:grid-cols-2 gap-8">
+                        {/* Father */}
+                        <div className="space-y-4 p-4 rounded-xl border bg-card">
+                            <h3 className="font-semibold text-lg flex items-center gap-2 border-b pb-2"><User className="h-4 w-4"/> Father's Details</h3>
+                            <FormField control={form.control} name="father_phone" render={({ field }) => (
+                                <FormItem><FormLabel>Phone Number *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                            )} />
+                            <FormField control={form.control} name="father_email" render={({ field }) => (
+                                <FormItem><FormLabel>Email Address</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>
+                            )} />
                         </div>
-                        <div className="flex-1 w-full">
-                          <FormField control={form.control} name="preferred_whatsapp" render={({ field }) => (
-                              <FormItem>
-                                  <FormControl>
-                                      <Input className="w-full h-[64px] bg-white border-2 border-green-200 shadow-sm rounded-xl px-6 text-slate-900 focus-visible:ring-4 focus-visible:ring-green-500/30 font-bold text-lg placeholder:text-slate-400 placeholder:font-medium" placeholder="WhatsApp Number *" {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                              </FormItem>
-                          )} />
+                        {/* Mother */}
+                        <div className="space-y-4 p-4 rounded-xl border bg-card">
+                            <h3 className="font-semibold text-lg flex items-center gap-2 border-b pb-2"><User className="h-4 w-4"/> Mother's Details</h3>
+                            <FormField control={form.control} name="mother_phone" render={({ field }) => (
+                                <FormItem><FormLabel>Phone Number *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                            )} />
+                            <FormField control={form.control} name="mother_email" render={({ field }) => (
+                                <FormItem><FormLabel>Email Address</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>
+                            )} />
                         </div>
                     </div>
 
-                    <div className="md:col-span-6 p-6 lg:p-10 rounded-2xl bg-surface-container mt-6">
-                        <h3 className="font-bold text-xl text-slate-900 mb-8 flex items-center gap-3">
-                          <span className="material-symbols-outlined text-tertiary-container text-3xl">emergency</span> Emergency Contact
-                        </h3>
+                    <div className="p-4 rounded-xl border-l-4 border-l-green-500 bg-green-50">
+                        <FormField control={form.control} name="preferred_whatsapp" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel className="text-green-900">Preferred WhatsApp Number *</FormLabel>
+                                <FormControl><Input className="bg-white border-green-200" placeholder="For school updates" {...field} /></FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                    </div>
+
+                    <div className="p-5 rounded-xl border bg-red-50/50 border-red-100">
+                        <h3 className="font-semibold text-lg text-red-900 mb-4">Emergency Contact</h3>
                         <div className="grid md:grid-cols-3 gap-6">
                             <FormField control={form.control} name="emergency_contact_name" render={({ field }) => (
-                                <FormItem><FormLabel className="text-sm font-bold text-slate-700 px-1">Contact Name *</FormLabel><FormControl><Input className="w-full h-[56px] bg-white border-none shadow-sm rounded-md px-5 text-slate-900 focus-visible:ring-2 focus-visible:ring-primary/20 font-medium" {...field} /></FormControl><FormMessage /></FormItem>
+                                <FormItem><FormLabel>Contact Name *</FormLabel><FormControl><Input className="bg-white" {...field} /></FormControl><FormMessage /></FormItem>
                             )} />
                             <FormField control={form.control} name="emergency_contact_relationship" render={({ field }) => (
-                                <FormItem><FormLabel className="text-sm font-bold text-slate-700 px-1">Relationship *</FormLabel><FormControl><Input className="w-full h-[56px] bg-white border-none shadow-sm rounded-md px-5 text-slate-900 focus-visible:ring-2 focus-visible:ring-primary/20 font-medium" placeholder="e.g. Uncle" {...field} /></FormControl><FormMessage /></FormItem>
+                                <FormItem><FormLabel>Relationship *</FormLabel><FormControl><Input className="bg-white" placeholder="e.g. Uncle" {...field} /></FormControl><FormMessage /></FormItem>
                             )} />
                             <FormField control={form.control} name="emergency_contact_number" render={({ field }) => (
-                                <FormItem><FormLabel className="text-sm font-bold text-slate-700 px-1">Contact Number *</FormLabel><FormControl><Input className="w-full h-[56px] bg-white border-none shadow-sm rounded-md px-5 text-slate-900 focus-visible:ring-2 focus-visible:ring-primary/20 font-medium" {...field} /></FormControl><FormMessage /></FormItem>
+                                <FormItem><FormLabel>Contact Number *</FormLabel><FormControl><Input className="bg-white" {...field} /></FormControl><FormMessage /></FormItem>
                             )} />
                         </div>
                     </div>
 
-                    <FormField control={form.control} name="medical_conditions" render={({ field }) => (
-                        <FormItem className="md:col-span-3 mt-4"><FormLabel className="text-sm font-bold text-slate-700 px-1">Medical Conditions</FormLabel><FormControl><Textarea className={textareaClasses} {...field} /></FormControl><FormMessage /></FormItem>
-                    )} />
-                    <div className="md:col-span-3 space-y-6 mt-4">
-                        <FormField control={form.control} name="allergies" render={({ field }) => (
-                            <FormItem><FormLabel className="text-sm font-bold text-slate-700 px-1">Allergies</FormLabel><FormControl><Input className={inputClasses} {...field} /></FormControl><FormMessage /></FormItem>
+                    <div className="grid md:grid-cols-2 gap-6">
+                        <FormField control={form.control} name="medical_conditions" render={({ field }) => (
+                            <FormItem><FormLabel>Medical Conditions</FormLabel><FormControl><Textarea className="resize-none" {...field} /></FormControl></FormItem>
                         )} />
-                        <FormField control={form.control} name="previous_school" render={({ field }) => (
-                            <FormItem><FormLabel className="text-sm font-bold text-slate-700 px-1">Previous School (if any)</FormLabel><FormControl><Input className={inputClasses} {...field} /></FormControl><FormMessage /></FormItem>
-                        )} />
+                        <div className="space-y-6">
+                            <FormField control={form.control} name="allergies" render={({ field }) => (
+                                <FormItem><FormLabel>Allergies</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>
+                            )} />
+                            <FormField control={form.control} name="previous_school" render={({ field }) => (
+                                <FormItem><FormLabel>Previous School (if any)</FormLabel><FormControl><Input {...field} /></FormControl></FormItem>
+                            )} />
+                        </div>
                     </div>
 
-                  </div>
-                </section>
+                  </CardContent>
+                </Card>
               </motion.div>
             )}
 
             {currentStep === 3 && (
-              <motion.div key="step3" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}>
-                <section className="bg-surface-container-lowest rounded-2xl p-6 md:p-10 shadow-[0_8px_32px_rgba(0,0,0,0.06)] border border-white/50">
-                  <header className="flex flex-col md:flex-row md:items-center gap-6 mb-10 pb-8 border-b border-surface-container-low">
-                    <div className="w-16 h-16 rounded-2xl bg-tertiary-fixed flex items-center justify-center shrink-0">
-                      <span className="material-symbols-outlined text-tertiary text-4xl">folder_open</span>
-                    </div>
+              <motion.div key="step3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
+                <Card className="shadow-md border-border/50 overflow-hidden">
+                  <div className="bg-primary/5 border-b p-6">
+                    <CardTitle className="text-2xl font-bold flex items-center gap-2">
+                        <FileText className="h-6 w-6 text-primary" /> Key Documents
+                    </CardTitle>
+                    <CardDescription className="text-base mt-1">Upload photos and required documentation. (Optional for now, but recommended)</CardDescription>
+                  </div>
+                  <CardContent className="space-y-8 pt-6">
+                    
                     <div>
-                      <h2 className="text-2xl lg:text-3xl font-['Plus_Jakarta_Sans'] font-bold text-slate-900 leading-tight">Key Documents</h2>
-                      <p className="text-on-surface-variant font-medium mt-1">Upload photographs and required official documentation.</p>
-                    </div>
-                  </header>
-                  
-                  <div className="space-y-12">
-                    <div>
-                        <h3 className="text-xl font-bold mb-6 text-slate-900 flex items-center gap-2">Photographs</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <h3 className="text-lg font-semibold mb-4 border-b pb-2">Photographs</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                             <FileUploader id="child-photo" label="Child's Photo" keyName="child_photo" />
                             <FileUploader id="father-photo" label="Father's Photo" keyName="father_photo" />
                             <FileUploader id="mother-photo" label="Mother's Photo" keyName="mother_photo" />
@@ -561,35 +520,31 @@ export default function AdmissionPage() {
                     </div>
 
                     <div>
-                        <h3 className="text-xl font-bold mb-6 text-slate-900 flex items-center gap-2">Official Documents</h3>
+                        <h3 className="text-lg font-semibold mb-4 border-b pb-2">Official Documents</h3>
                         <div className="grid md:grid-cols-2 gap-6">
-                            <FileUploader id="birth-cert" label="Birth Certificate Document" keyName="birth_certificate_file" accept=".pdf,.jpg,.jpeg,.png" />
-                            <FileUploader id="aadhaar" label="Aadhaar Card Document" keyName="aadhaar_card_file" accept=".pdf,.jpg,.jpeg,.png" />
+                            <FileUploader id="birth-cert" label="Birth Certificate Xerox" keyName="birth_certificate_file" accept=".pdf,.jpg,.jpeg,.png" />
+                            <FileUploader id="aadhaar" label="Aadhaar Card Xerox" keyName="aadhaar_card_file" accept=".pdf,.jpg,.jpeg,.png" />
                         </div>
                     </div>
-                  </div>
-                </section>
+
+                  </CardContent>
+                </Card>
               </motion.div>
             )}
 
             {currentStep === 4 && (
-              <motion.div key="step4" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}>
-                <section className="bg-surface-container-lowest rounded-2xl p-6 md:p-10 shadow-[0_8px_32px_rgba(0,0,0,0.06)] border border-white/50">
-                  <header className="flex flex-col md:flex-row md:items-center gap-6 mb-10 pb-8 border-b border-surface-container-low">
-                    <div className="w-16 h-16 rounded-2xl bg-green-100 flex items-center justify-center shrink-0">
-                      <span className="material-symbols-outlined text-green-700 text-4xl">verified</span>
-                    </div>
-                    <div>
-                      <h2 className="text-2xl lg:text-3xl font-['Plus_Jakarta_Sans'] font-bold text-slate-900 leading-tight">Review & Signatures</h2>
-                      <p className="text-on-surface-variant font-medium mt-1">Provide digital signatures and finalize the application.</p>
-                    </div>
-                  </header>
-                  
-                  <div className="space-y-10">
-                    <div className="bg-surface p-8 rounded-2xl text-sm text-slate-600 leading-relaxed font-medium">
-                        <p className="font-bold text-lg text-slate-900 mb-3 flex items-center gap-2">
-                          <span className="material-symbols-outlined text-tertiary-container text-xl">gavel</span> Declaration
-                        </p>
+              <motion.div key="step4" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.3 }}>
+                <Card className="shadow-md border-border/50 overflow-hidden">
+                  <div className="bg-primary/5 border-b p-6">
+                    <CardTitle className="text-2xl font-bold flex items-center gap-2">
+                        <ClipboardCheck className="h-6 w-6 text-primary" /> Review & Signatures
+                    </CardTitle>
+                    <CardDescription className="text-base mt-1">Provide digital signatures and finalize the application.</CardDescription>
+                  </div>
+                  <CardContent className="space-y-8 pt-6">
+                    
+                    <div className="bg-muted/50 p-6 rounded-xl text-sm text-foreground/80 leading-relaxed border">
+                        <p className="font-semibold text-foreground mb-2">Declaration:</p>
                         I hereby certify that the information given in the admission form is complete and accurate. I understand and
                         agree this misrepresentation or omission of facts will justify the denial of admission, the cancellation of
                         admission or expulsion. I have read and do hereby accede to all terms and conditions enclosed with the
@@ -597,109 +552,74 @@ export default function AdmissionPage() {
                     </div>
 
                     <div>
-                        <h3 className="text-xl font-bold mb-6 text-slate-900">Digital Signatures</h3>
+                        <h3 className="text-lg font-semibold mb-4 border-b pb-2">Digital Signatures</h3>
                         <div className="grid md:grid-cols-2 gap-6">
-                            <FileUploader id="father-sig" label="Father's Signature Image" keyName="father_signature_file" accept="image/*,.pdf" />
-                            <FileUploader id="mother-sig" label="Mother's Signature Image" keyName="mother_signature_file" accept="image/*,.pdf" />
+                            <FileUploader id="father-sig" label="Father's Signature" keyName="father_signature_file" accept="image/*,.pdf" />
+                            <FileUploader id="mother-sig" label="Mother's Signature" keyName="mother_signature_file" accept="image/*,.pdf" />
                         </div>
                     </div>
 
-                    <div className="pt-4">
+                    <div className="border-t pt-6">
                         <FormField control={form.control} name="signatures_confirmed" render={({ field }) => (
-                            <FormItem className="flex flex-row items-center space-x-4 space-y-0 p-6 md:p-8 border-2 border-primary/20 rounded-2xl bg-primary-fixed/20 cursor-pointer transition-all hover:bg-primary-fixed/30">
+                            <FormItem className="flex flex-row items-center space-x-3 space-y-0 p-4 border rounded-xl bg-primary/5">
                                 <FormControl>
                                     <input
                                         type="checkbox"
                                         id="signatures-confirm"
-                                        className="h-6 w-6 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer shrink-0"
+                                        className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary"
                                         checked={field.value}
                                         onChange={(e) => field.onChange(e.target.checked)}
                                     />
                                 </FormControl>
-                                <label htmlFor="signatures-confirm" className="text-base md:text-lg font-bold text-primary cursor-pointer select-none">
+                                <FormLabel htmlFor="signatures-confirm" className="text-base cursor-pointer">
                                     I confirm that the digital signatures are valid and authorized by the respective guardians
-                                </label>
+                                </FormLabel>
                             </FormItem>
                         )} />
                     </div>
 
                     {selectedClass && (
-                        <div className="bg-gradient-to-br from-primary-container to-primary border border-primary rounded-2xl p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl shadow-blue-200">
+                        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 flex items-center justify-between">
                             <div>
-                                <h4 className="font-bold text-2xl text-white">Total Annual Fees</h4>
-                                <p className="text-sm font-medium text-white/80 uppercase tracking-widest mt-1">For {selectedClass}</p>
+                                <h4 className="font-semibold text-blue-900">Total Annual Fees</h4>
+                                <p className="text-sm text-blue-700/80">For {selectedClass.toUpperCase()}</p>
                             </div>
-                            <div className="text-5xl font-black text-white font-['Plus_Jakarta_Sans']">
+                            <div className="text-3xl font-bold text-blue-700">
                                 ₹{totalFee.toLocaleString('en-IN')}
                             </div>
                         </div>
                     )}
 
-                  </div>
-                </section>
+                  </CardContent>
+                </Card>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Form Actions */}
-          <div className="mt-12 flex flex-col-reverse sm:flex-row items-center justify-between pt-8 border-t border-surface-container-high gap-6">
-             {currentStep > 1 ? (
-               <button 
-                 type="button" 
-                 onClick={prevStep}
-                 disabled={isSubmitting}
-                 className="flex items-center justify-center gap-3 px-8 py-4 rounded-full font-bold text-slate-600 hover:bg-surface-container-high transition-all active:scale-95 disabled:opacity-50 w-full sm:w-auto"
-               >
-                 <span className="material-symbols-outlined text-slate-500">arrow_back</span>
-                 <span className="text-lg">Go Back</span>
-               </button>
-             ) : (
-                 <div className="hidden sm:block"></div>
-             )}
+          {/* Navigation Buttons */}
+          <div className="flex justify-between items-center pt-4">
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="lg"
+              className={currentStep === 1 ? 'invisible' : ''}
+              onClick={prevStep}
+              disabled={isSubmitting}
+            >
+              <ChevronLeft className="mr-2 h-4 w-4" /> Back
+            </Button>
 
             {currentStep < STEPS.length ? (
-              <button 
-                type="button" 
-                onClick={nextStep} 
-                className="bg-primary text-white px-10 py-5 rounded-full font-bold text-lg hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-blue-200 flex items-center justify-center gap-3 w-full sm:w-auto"
-              >
-                <span>Continue</span>
-                <span className="material-symbols-outlined">arrow_forward</span>
-              </button>
+              <Button type="button" size="lg" onClick={nextStep} className="px-8 shadow-md">
+                Continue <ChevronRight className="ml-2 h-4 w-4" />
+              </Button>
             ) : (
-              <button 
-                type="submit" 
-                disabled={isSubmitting || !totalFee || !form.getValues('signatures_confirmed')}
-                className="bg-secondary text-white px-10 py-5 rounded-full font-bold text-lg hover:bg-secondary/90 hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-pink-200 flex items-center justify-center gap-3 disabled:opacity-50 disabled:hover:scale-100 w-full sm:w-auto"
-              >
-                {isSubmitting ? <BrandLoader text="" /> : <span className="material-symbols-outlined">task_alt</span>}
-                <span>{isSubmitting ? 'Submitting...' : 'Submit Application'}</span>
-              </button>
+              <Button type="submit" size="lg" className="px-8 shadow-md" disabled={isSubmitting || !totalFee || !form.getValues('signatures_confirmed')}>
+                {isSubmitting ? <BrandLoader text="" /> : <CheckCircle className="mr-2 h-5 w-5" />}
+                {isSubmitting ? 'Submitting...' : 'Submit Application'}
+              </Button>
             )}
           </div>
-          
-          {/* Helpful Tip Bento (Small) */}
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="bg-secondary-fixed/50 rounded-2xl p-6 flex gap-4 items-start border border-secondary-fixed">
-              <div className="w-12 h-12 rounded-full bg-secondary flex items-center justify-center flex-shrink-0 shadow-sm">
-                <span className="material-symbols-outlined text-white">lightbulb</span>
-              </div>
-              <div>
-                <h4 className="font-bold text-slate-900 text-lg">Tip for parents</h4>
-                <p className="text-sm text-slate-700 font-medium leading-relaxed mt-1">Ensure the name matches the birth certificate exactly to avoid verification delays.</p>
-              </div>
-            </div>
-            <div className="bg-tertiary-fixed/50 rounded-2xl p-6 flex gap-4 items-start border border-tertiary-fixed">
-              <div className="w-12 h-12 rounded-full bg-tertiary-container flex items-center justify-center flex-shrink-0 shadow-sm">
-                <span className="material-symbols-outlined text-white">support_agent</span>
-              </div>
-              <div>
-                <h4 className="font-bold text-slate-900 text-lg">Need Help?</h4>
-                <p className="text-sm text-slate-700 font-medium leading-relaxed mt-1">Our admission counselors are available Mon-Sat, 9AM to 4PM for guidance.</p>
-              </div>
-            </div>
-          </div>
-
         </form>
       </Form>
     </div>

@@ -1,24 +1,54 @@
 import { useEffect, useState } from 'react';
 import { paymentApi, admissionApi, storageApi } from '@/db/api';
 import type { Payment, AdmissionWithStudent } from '@/types';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { Loader2 } from 'lucide-react';
+import { DollarSign, Upload, CheckCircle, Clock, AlertCircle, Calendar, Loader2, FileText } from 'lucide-react';
+import { EmptyState } from '@/components/common/EmptyState';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.05 }
+    transition: {
+      staggerChildren: 0.05
+    }
   }
 };
 
@@ -27,7 +57,10 @@ const itemVariants = {
   visible: {
     y: 0,
     opacity: 1,
-    transition: { type: 'spring' as const, stiffness: 100 }
+    transition: {
+      type: 'spring' as const,
+      stiffness: 100
+    }
   }
 };
 
@@ -60,8 +93,10 @@ export default function PaymentsPage() {
     },
   });
 
+  // Watch for admission change in form to update summary in dialog
   const watchedAdmissionId = form.watch('admission_id');
 
+  // Sync default admission_id when admissions load
   useEffect(() => {
     if (admissions.length > 0 && !form.getValues('admission_id')) {
       form.setValue('admission_id', admissions[0].id);
@@ -96,6 +131,7 @@ export default function PaymentsPage() {
   const onSubmit = async (data: PaymentFormData) => {
     try {
       setIsSubmitting(true);
+
       let receiptUrl: string | undefined;
 
       if (data.receipt_file && data.receipt_file[0]) {
@@ -116,7 +152,9 @@ export default function PaymentsPage() {
 
       toast({
         title: 'Payment Submitted',
-        description: receiptUrl ? 'Your payment has been submitted for verification' : 'Payment record created. Please upload receipt.',
+        description: receiptUrl
+          ? 'Your payment has been submitted for verification'
+          : 'Payment record created. Please upload receipt.',
       });
 
       setDialogOpen(false);
@@ -156,152 +194,181 @@ export default function PaymentsPage() {
   };
 
   const getStatusBadge = (status: string) => {
-    const config: Record<string, { icon: string; classes: string; label: string }> = {
-      pending_upload: { icon: 'upload', classes: 'bg-slate-100 text-slate-700', label: 'Upload Required' },
-      under_verification: { icon: 'schedule', classes: 'bg-blue-100 text-blue-700', label: 'Under Review' },
-      approved: { icon: 'check_circle', classes: 'bg-green-100 text-green-700', label: 'Approved' },
-      rejected: { icon: 'error', classes: 'bg-red-100 text-red-700', label: 'Rejected' },
+    const config: Record<string, { icon: React.ReactNode; variant: 'default' | 'secondary' | 'destructive' | 'outline'; label: string; color: string }> = {
+      pending_upload: {
+        icon: <Upload className="h-3 w-3" />,
+        variant: 'outline',
+        label: 'Pending Upload',
+        color: 'text-gray-600',
+      },
+      under_verification: {
+        icon: <Clock className="h-3 w-3" />,
+        variant: 'secondary',
+        label: 'Under Review',
+        color: 'text-blue-600',
+      },
+      approved: {
+        icon: <CheckCircle className="h-3 w-3" />,
+        variant: 'default',
+        label: 'Approved',
+        color: 'text-green-600',
+      },
+      rejected: {
+        icon: <AlertCircle className="h-3 w-3" />,
+        variant: 'destructive',
+        label: 'Rejected',
+        color: 'text-red-600',
+      },
     };
 
-    const { icon, classes, label } = config[status] || config.pending_upload;
+    const { icon, variant, label } = config[status] || config.pending_upload;
 
     return (
-      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${classes}`}>
-        <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>{icon}</span>
+      <Badge variant={variant} className="gap-1">
+        {icon}
         {label}
-      </span>
+      </Badge>
     );
   };
 
   if (loading) {
     return (
-      <div className="space-y-8 animate-pulse p-4 md:p-12 max-w-7xl mx-auto w-full">
-        <div className="h-16 w-64 bg-slate-200 rounded-lg mb-8"></div>
-        <div className="h-96 w-full bg-slate-200 rounded-3xl"></div>
+      <div className="space-y-8">
+        <Skeleton className="h-10 w-48 bg-muted" />
+        <Skeleton className="h-48 w-full bg-muted rounded-lg" />
+        <Skeleton className="h-96 w-full bg-muted rounded-lg" />
       </div>
     );
   }
 
+  // Calculate payment summary
   const currentAdmission = admissions.find(a => a.id === watchedAdmissionId) || admissions[0];
   const paymentSummary = currentAdmission
     ? (() => {
       const admission = currentAdmission;
       const admissionPayments = payments.filter(p => p.admission_id === admission.id);
-      const paidAmount = admissionPayments.filter(p => p.status === 'approved').reduce((sum, p) => sum + p.amount, 0);
+      const paidAmount = admissionPayments
+        .filter(p => p.status === 'approved')
+        .reduce((sum, p) => sum + p.amount, 0);
       const totalFee = admission.total_fee || 0;
-      const discountAmount = admission.discount_amount || 0;
-      const finalFee = admission.final_fee || (totalFee - discountAmount);
       return {
         totalFee,
-        finalFee,
         paidAmount,
-        remainingBalance: finalFee - paidAmount,
-        paymentPercent: finalFee > 0 ? Math.round((paidAmount / finalFee) * 100) : 0,
+        remainingBalance: totalFee - paidAmount,
+        paymentPercent: Math.round((paidAmount / totalFee) * 100) || 0,
       };
-    })() : null;
+    })()
+    : null;
 
   return (
-    <motion.div initial="hidden" animate="visible" variants={containerVariants} className="w-full font-['Plus_Jakarta_Sans']">
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+      className="space-y-8"
+    >
+      {/* Header */}
+      <motion.div variants={itemVariants} className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="space-y-2">
+          <h1 className="text-4xl font-bold tracking-tight">Fees & Payments</h1>
+          <p className="text-muted-foreground">Manage and track all fee payments</p>
+        </div>
+      </motion.div>
 
-      <div className="grid grid-cols-12 gap-8 items-start">
-        
-        {admissions.length === 0 && (
-          <motion.div variants={itemVariants} className="col-span-12 lg:col-span-8 bg-white border border-slate-100 rounded-3xl p-10 flex flex-col md:flex-row items-center gap-10 relative overflow-hidden group hover:shadow-[0_8px_32px_rgba(0,0,0,0.04)] transition-all duration-300">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-transparent pointer-events-none"></div>
-            <div className="relative z-10 w-full md:w-1/2">
-              <div className="w-24 h-24 bg-pink-100 rounded-3xl flex items-center justify-center mb-8 shadow-lg shadow-pink-100/50">
-                <span className="material-symbols-outlined text-pink-600 text-[48px]" style={{ fontVariationSettings: "'FILL' 1" }}>assignment_late</span>
-              </div>
-              <h2 className="text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">No Approved Admissions</h2>
-              <p className="text-lg text-slate-500 font-['Be_Vietnam_Pro'] leading-relaxed mb-8">Submit an admission form to start making payments and secure your child's spot in our global curriculum.</p>
-              <button onClick={() => navigate('/admission')} className="bg-[#F44336] text-white px-8 py-4 rounded-full font-bold text-lg shadow-xl shadow-red-500/30 hover:scale-[1.02] active:scale-95 transition-all flex items-center w-fit gap-3">
-                Apply Now
-                <span className="material-symbols-outlined">arrow_forward</span>
-              </button>
-            </div>
-            <div className="w-full md:w-1/2 flex justify-center items-center relative z-10">
-              <div className="w-full aspect-square max-w-md bg-slate-50 rounded-3xl overflow-hidden shadow-inner flex items-center justify-center">
-                <img alt="Playful Illustration" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2sd_FbohivLxuYD2BncbVOSxQ2h_v8ffXXhEgWbtuKU7fosHnhsaJ70-In1ofRZliAdGCEfxptHajHKBkarZLxYRuOgtqP9-91GdGYxHfodKxI3oIPtWf99rG8W4DyI33a1tnAY6OxUqYZyoVZJVVM1PgwX_RorufEOGyLAKnvIojudNy5XY63Pta9HMCcmNC6S_tCeB1QPBlLeqjz-0HZqvotCsOIdE1G4P99YJ_TcdnA_O3aLJ5Pk_63fTvTCZqis6WozNt4jep" />
-              </div>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Payment Summary */}
-        <motion.div variants={itemVariants} className={`col-span-12 md:col-span-6 lg:col-span-4 bg-blue-600 rounded-3xl p-6 flex flex-col justify-between shadow-xl shadow-blue-600/20 group hover:scale-[1.01] transition-transform ${admissions.length === 0 ? 'h-full' : ''}`}>
-          <div>
-            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-4 backdrop-blur-md">
-              <span className="material-symbols-outlined text-white text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>account_balance_wallet</span>
-            </div>
-            <p className="text-blue-100 font-bold uppercase tracking-widest text-[10px] mb-1">Current Balance</p>
-            <h3 className="text-4xl lg:text-5xl font-extrabold text-white tracking-tighter">
-              ₹{paymentSummary ? paymentSummary.remainingBalance.toLocaleString('en-IN', { maximumFractionDigits: 0 }) : 0}
-            </h3>
-          </div>
-          
-          <div className="mt-8 pt-6 border-t border-white/20 space-y-4 font-['Be_Vietnam_Pro']">
-            {paymentSummary ? (
-              <>
-                <div className="flex justify-between items-center text-white">
-                  <span className="text-sm font-medium opacity-90">Base Fee:</span>
-                  <span className="font-bold">₹{paymentSummary.totalFee.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
-                </div>
-                {currentAdmission?.discount_amount && currentAdmission.discount_amount > 0 && (
-                  <div className="flex justify-between items-center text-yellow-300">
-                    <span className="text-sm font-medium">Discount:</span>
-                    <span className="font-bold">-₹{Number(currentAdmission.discount_amount).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+      {admissions.length === 0 ? (
+        <motion.div variants={itemVariants}>
+          <EmptyState
+            icon={FileText}
+            title="No Approved Admissions"
+            description="It looks like you don't have any approved admissions yet. Please submit an admission form or wait until your current application gets approved to start making payments."
+            action={{
+              label: "Apply Now",
+              onClick: () => navigate('/admission')
+            }}
+          />
+        </motion.div>
+      ) : (
+        <>
+          {/* Fee Summary Card */}
+          {paymentSummary && (
+            <Card className="border-2">
+              <CardHeader className="pb-4">
+                <CardTitle>Your Payment Summary</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground font-medium">Fee Breakdown</p>
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span>Base Fee:</span>
+                        <span>₹{Number(currentAdmission.total_fee).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                      </div>
+                      {currentAdmission.discount_amount && currentAdmission.discount_amount > 0 && (
+                        <div className="flex justify-between text-xs text-orange-600 font-medium">
+                          <span>Discount:</span>
+                          <span>- ₹{Number(currentAdmission.discount_amount).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between text-base font-bold pt-1 border-t border-dashed">
+                        <span>Total Payable:</span>
+                        <span className="text-primary">₹{Number(currentAdmission.final_fee || currentAdmission.total_fee).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+                      </div>
+                    </div>
                   </div>
-                )}
-                <div className="flex justify-between items-center text-white font-['Plus_Jakarta_Sans'] pt-2 border-t border-white/20">
-                  <span className="text-sm font-bold opacity-90">Total Payable:</span>
-                  <span className="font-bold text-lg">₹{paymentSummary.finalFee.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
-                </div>
-                <div className="flex justify-between items-center text-white mt-4">
-                  <span className="text-sm font-medium opacity-90">Amount Paid:</span>
-                  <span className="font-bold">₹{paymentSummary.paidAmount.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
-                </div>
-                
-                <div className="space-y-1.5 mt-4 pt-4 border-t border-white/10">
-                  <div className="flex justify-between items-center text-white">
-                    <span className="text-[10px] font-bold uppercase tracking-wider">Progress</span>
-                    <span className="text-xs font-bold">{paymentSummary.paymentPercent}%</span>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Amount Paid</p>
+                    <p className="text-3xl font-bold text-green-600">₹{paymentSummary.paidAmount.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
                   </div>
-                  <div className="h-1.5 w-full bg-black/20 rounded-full overflow-hidden">
-                    <div className="h-full bg-white rounded-full transition-all duration-1000" style={{ width: `${paymentSummary.paymentPercent}%` }}></div>
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">Remaining</p>
+                    <p className="text-3xl font-bold text-orange-600">₹{paymentSummary.remainingBalance.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
                   </div>
                 </div>
 
+                {/* Progress Bar */}
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-medium">Payment Progress</span>
+                    <span className="text-2xl font-bold">{paymentSummary.paymentPercent}%</span>
+                  </div>
+                  <Progress value={paymentSummary.paymentPercent} className="h-4" />
+                </div>
+
+                {/* Payment Button */}
                 {paymentSummary.remainingBalance > 0 && (
                   <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                     <DialogTrigger asChild>
-                      <button className="w-full mt-4 bg-white text-blue-600 font-bold py-3 rounded-full hover:scale-[1.02] active:scale-95 shadow-lg shadow-white/10 transition-transform flex items-center justify-center gap-2 text-sm">
-                        Make a Payment
-                        <span className="material-symbols-outlined text-[18px]">payments</span>
-                      </button>
+                      <Button size="lg" className="w-full">
+                        <DollarSign className="mr-2 h-5 w-5" />
+                        Make Payment
+                      </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-md rounded-3xl border-none shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] p-8 font-['Be_Vietnam_Pro']">
-                      <DialogHeader className="mb-4">
-                        <DialogTitle className="text-2xl font-bold font-['Plus_Jakarta_Sans'] text-slate-900">Record Payment</DialogTitle>
-                        <DialogDescription className="text-base text-slate-500">Submit your fee payment details.</DialogDescription>
+                    <DialogContent className="max-w-md">
+                      <DialogHeader>
+                        <DialogTitle>Record Payment</DialogTitle>
+                        <DialogDescription>
+                          Submit your fee payment.
+                        </DialogDescription>
                       </DialogHeader>
 
                       <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                           <FormField
                             control={form.control}
                             name="admission_id"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className="font-bold text-slate-700">Select Child</FormLabel>
+                                <FormLabel>Select Child</FormLabel>
                                 <Select onValueChange={field.onChange} value={field.value}>
                                   <FormControl>
-                                    <SelectTrigger className="h-[56px] bg-slate-50 border-none rounded-xl px-5 text-base font-medium shadow-none focus:ring-2 focus:ring-blue-100">
+                                    <SelectTrigger>
                                       <SelectValue placeholder="Select child" />
                                     </SelectTrigger>
                                   </FormControl>
-                                  <SelectContent className="rounded-xl border-none shadow-xl">
+                                  <SelectContent>
                                     {admissions.map((admission) => (
-                                      <SelectItem key={admission.id} value={admission.id} className="cursor-pointer py-3 rounded-lg mx-1 focus:bg-blue-50 focus:text-blue-700">
+                                      <SelectItem key={admission.id} value={admission.id}>
                                         {admission.student?.full_name}
                                       </SelectItem>
                                     ))}
@@ -317,160 +384,164 @@ export default function PaymentsPage() {
                             name="amount"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className="font-bold text-slate-700">Amount (₹)</FormLabel>
+                                <FormLabel>Amount (₹)</FormLabel>
                                 <FormControl>
-                                  <Input type="number" step="0.01" placeholder="Enter amount" className="h-[56px] bg-slate-50 border-none rounded-xl px-5 text-base font-medium shadow-none focus-visible:ring-2 focus-visible:ring-blue-100" {...field} />
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="Enter amount"
+                                    {...field}
+                                  />
                                 </FormControl>
-                                <FormDescription className="text-blue-600 font-medium pt-1">
-                                  Remaining Balance: ₹{paymentSummary.remainingBalance.toLocaleString('en-IN')}
+                                <FormDescription>
+                                  Remaining: ₹{paymentSummary.remainingBalance.toLocaleString('en-IN')}
                                 </FormDescription>
                                 <FormMessage />
                               </FormItem>
                             )}
                           />
 
-                          <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                              control={form.control}
-                              name="payment_date"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel className="font-bold text-slate-700">Date</FormLabel>
+                          <FormField
+                            control={form.control}
+                            name="payment_date"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Payment Date</FormLabel>
+                                <FormControl>
+                                  <Input type="date" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+
+                          <FormField
+                            control={form.control}
+                            name="payment_type"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Payment Type</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
                                   <FormControl>
-                                    <Input type="date" className="h-[56px] bg-slate-50 border-none rounded-xl px-5 text-base font-medium shadow-none focus-visible:ring-2 focus-visible:ring-blue-100" {...field} />
+                                    <SelectTrigger>
+                                      <SelectValue />
+                                    </SelectTrigger>
                                   </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
+                                  <SelectContent>
+                                    <SelectItem value="initial">Initial Payment</SelectItem>
+                                    <SelectItem value="installment">Installment</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
 
-                            <FormField
-                              control={form.control}
-                              name="payment_type"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel className="font-bold text-slate-700">Type</FormLabel>
-                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                      <SelectTrigger className="h-[56px] bg-slate-50 border-none rounded-xl px-5 text-base font-medium shadow-none focus:ring-2 focus:ring-blue-100">
-                                        <SelectValue />
-                                      </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent className="rounded-xl border-none shadow-xl">
-                                      <SelectItem value="initial" className="cursor-pointer py-3 rounded-lg mx-1 focus:bg-blue-50 focus:text-blue-700">Initial</SelectItem>
-                                      <SelectItem value="installment" className="cursor-pointer py-3 rounded-lg mx-1 focus:bg-blue-50 focus:text-blue-700">Installment</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-
-                          <div className="flex justify-end gap-3 pt-6 mt-6 border-t border-slate-100">
-                            <button type="button" onClick={() => setDialogOpen(false)} disabled={isSubmitting} className="px-6 py-3 rounded-full font-bold text-slate-500 hover:bg-slate-100 transition-colors">
+                          <div className="flex justify-end gap-2 pt-4">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={() => setDialogOpen(false)}
+                              disabled={isSubmitting}
+                            >
                               Cancel
-                            </button>
-                            <button type="submit" disabled={isSubmitting} className="px-8 py-3 rounded-full font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition-all flex items-center justify-center min-w-[140px]">
-                              {isSubmitting ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : 'Submit'}
-                            </button>
+                            </Button>
+                            <Button type="submit" disabled={isSubmitting}>
+                              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                              Submit
+                            </Button>
                           </div>
                         </form>
                       </Form>
                     </DialogContent>
                   </Dialog>
                 )}
-              </>
-            ) : (
-              <p className="text-white text-sm font-medium opacity-90">Total Due: ₹0</p>
-            )}
-          </div>
-        </motion.div>
+              </CardContent>
+            </Card>
+          )}
 
-        {admissions.length === 0 && (
-          <motion.div variants={itemVariants} className="col-span-12 md:col-span-6 lg:col-span-4 bg-slate-100 rounded-3xl p-8 hover:bg-slate-100/80 transition-all cursor-pointer group shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-200/50">
-            <div className="flex items-start justify-between mb-8">
-              <div className="w-14 h-14 bg-orange-100 rounded-2xl flex items-center justify-center">
-                <span className="material-symbols-outlined text-orange-600 text-3xl">menu_book</span>
-              </div>
-              <span className="material-symbols-outlined text-slate-400 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform">open_in_new</span>
-            </div>
-            <h3 className="text-2xl font-bold text-slate-900 mb-2">Fee Structure</h3>
-            <p className="text-slate-500 font-['Be_Vietnam_Pro'] text-sm leading-relaxed">Download the comprehensive breakdown of tuition, activity fees, and meal plans.</p>
-          </motion.div>
-        )}
+          {/* Payment History Card */}
+          <motion.div variants={itemVariants}>
+            <Card>
+              <CardHeader className="border-b">
+                <CardTitle>Payment History</CardTitle>
+                <CardDescription>All your recorded payments</CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                {payments.length === 0 ? (
+                  <EmptyState
+                    icon={DollarSign}
+                    title="No payments recorded yet"
+                    description="Submit your first payment by clicking the Make Payment button above to get started."
+                  />
+                ) : (
+                  <motion.div
+                    variants={containerVariants}
+                    className="space-y-3"
+                  >
+                    {payments
+                      .sort((a, b) => new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime())
+                      .map((payment) => (
+                        <motion.div
+                          key={payment.id}
+                          variants={itemVariants}
+                          whileHover={{ scale: 1.01 }}
+                        >
+                          <div className="flex flex-col md:flex-row md:items-center justify-between p-4 border rounded-lg hover:bg-muted/30 transition-colors gap-3">
+                            <div className="flex items-start gap-4 flex-1">
+                              <div className="mt-1">
+                                <span className="flex p-2 bg-blue-50 rounded-full">
+                                  <Calendar className="h-5 w-5 text-blue-500" />
+                                </span>
+                              </div>
+                              <div className="space-y-1 flex-1">
+                                <div className="flex items-center gap-3">
+                                  <h3 className="font-semibold text-lg">₹{payment.amount.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</h3>
+                                  {getStatusBadge(payment.status)}
+                                </div>
+                                <p className="text-sm text-muted-foreground">
+                                  {format(new Date(payment.payment_date), 'EEEE, MMMM d, yyyy')} • {payment.payment_type === 'initial' ? 'Initial Payment' : 'Installment'}
+                                </p>
+                                {payment.verification_notes && (
+                                  <p className="text-sm text-muted-foreground italic mt-2">
+                                    Note: {payment.verification_notes}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
 
-        {/* Payment History */}
-        <motion.div variants={itemVariants} className={`${admissions.length === 0 ? 'col-span-12 lg:col-span-8' : 'col-span-12 lg:col-span-8'} bg-white border border-slate-100 shadow-sm rounded-3xl p-6 flex flex-col overflow-hidden`}>
-          <div className="flex justify-between items-center mb-6 border-b border-slate-100 pb-4 shrink-0">
-            <h3 className="text-xl font-bold text-slate-900">Payment History</h3>
-            <span className="text-slate-500 text-[10px] font-bold tracking-wide px-3 py-1.5 bg-slate-50 rounded-full border border-slate-100">Academic Year 2023-24</span>
-          </div>
-          
-          <div className="flex flex-col gap-4 font-['Be_Vietnam_Pro'] pr-1">
-            {payments.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 text-center text-slate-400 opacity-80">
-                <span className="material-symbols-outlined text-[72px] mb-6 text-slate-200 font-light">receipt_long</span>
-                <p className="text-xl font-bold text-slate-500 mb-2 font-['Plus_Jakarta_Sans']">No transactions found</p>
-                <p className="text-base max-w-sm">Once you begin your journey and make a payment, your history will elegantly appear here.</p>
-              </div>
-            ) : (
-              payments
-                .sort((a, b) => new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime())
-                .map((payment) => (
-                  <motion.div key={payment.id} variants={itemVariants} whileHover={{ scale: 1.005 }} className="group">
-                    <div className="flex flex-col xl:flex-row xl:items-center justify-between p-5 bg-slate-50/50 hover:bg-slate-50 border border-slate-100 rounded-2xl transition-all duration-300 gap-5">
-                      <div className="flex items-start md:items-center gap-5 flex-1">
-                        <div className="w-12 h-12 rounded-full bg-white shadow-sm border border-slate-100 text-blue-600 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300">
-                          <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>payments</span>
-                        </div>
-                        <div className="space-y-1.5 flex-1 w-full">
-                          <div className="flex flex-wrap items-center gap-3">
-                            <h3 className="font-extrabold text-[18px] text-slate-900 tracking-tight font-['Plus_Jakarta_Sans']">
-                              ₹{payment.amount.toLocaleString('en-IN', { maximumFractionDigits: 2 })}
-                            </h3>
-                            {getStatusBadge(payment.status)}
+                            <div className="md:flex-shrink-0">
+                              {payment.receipt_url ? (
+                                <Button variant="outline" size="sm" asChild className="shadow-sm">
+                                  <a href={payment.receipt_url} target="_blank" rel="noopener noreferrer">
+                                    <Upload className="mr-2 h-4 w-4" />
+                                    View Receipt
+                                  </a>
+                                </Button>
+                              ) : (
+                                <div className="hidden">
+                                  <Input
+                                    type="file"
+                                    accept="image/*"
+                                    id={`upload-${payment.id}`}
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0];
+                                      if (file) handleUploadReceipt(payment.id, file);
+                                    }}
+                                  />
+                                </div>
+                              )}
+                            </div>
                           </div>
-                          <div className="flex items-center gap-2 text-sm text-slate-500 font-medium">
-                            <span className="material-symbols-outlined text-[16px]">calendar_today</span>
-                            {format(new Date(payment.payment_date), 'EEEE, MMMM d, yyyy')}
-                            <span className="opacity-40">•</span>
-                            <span className="uppercase tracking-wider text-[11px] font-bold">{payment.payment_type === 'initial' ? 'Initial' : 'Installment'}</span>
-                          </div>
-                          {payment.verification_notes && (
-                            <p className="text-sm text-red-600 italic mt-2 font-medium flex items-center gap-1.5 bg-red-50 p-2.5 rounded-lg border border-red-100 w-fit">
-                              <span className="material-symbols-outlined text-[16px] text-red-500">info</span> 
-                              {payment.verification_notes}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                      <div className="md:flex-shrink-0 flex gap-2">
-                        {payment.receipt_url ? (
-                          <a href={payment.receipt_url} target="_blank" rel="noopener noreferrer" className="flex justify-center items-center gap-2 px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 shadow-sm transition-all w-full xl:w-auto">
-                            <span className="material-symbols-outlined text-[18px]">visibility</span>
-                            Receipt
-                          </a>
-                        ) : (
-                          <div className="w-full xl:w-auto">
-                            <Input type="file" accept="image/*,application/pdf" id={`upload-${payment.id}`} className="hidden" onChange={(e) => {
-                                const file = e.target.files?.[0];
-                                if (file) handleUploadReceipt(payment.id, file);
-                              }} />
-                            <label htmlFor={`upload-${payment.id}`} className="flex justify-center flex-1 items-center gap-2 px-5 py-2.5 bg-blue-50 text-blue-700 rounded-xl text-sm font-bold hover:bg-blue-100 cursor-pointer shadow-sm transition-all border border-blue-100">
-                              <span className="material-symbols-outlined text-[18px]">upload</span>
-                              Upload Receipt
-                            </label>
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                        </motion.div>
+                      ))}
                   </motion.div>
-                ))
-            )}
-          </div>
-        </motion.div>
-      </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        </>
+      )}
     </motion.div>
   );
 }
