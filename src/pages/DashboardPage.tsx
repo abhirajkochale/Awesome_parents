@@ -3,37 +3,28 @@ import { Link } from 'react-router-dom';
 import { dashboardApi } from '@/db/api';
 import { useAuth } from '@/contexts/AuthContext';
 import type { ParentDashboardSummary } from '@/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
 import { format } from 'date-fns';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { STANDARD_STYLES } from '@/lib/batchConfig';
-import { Baby, Flower2, Palette, BookOpen, GraduationCap, Users, DollarSign, Calendar, Bell, ArrowRight, Clock, AlertCircle } from 'lucide-react';
+import { Baby, Flower2, Palette, BookOpen, GraduationCap, DollarSign, Calendar, Bell, ArrowRight, Clock, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Progress } from '@/components/ui/progress';
 
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.1
-    }
+    transition: { staggerChildren: 0.08 }
   }
 };
 
 const itemVariants = {
-  hidden: { y: 20, opacity: 0 },
+  hidden: { y: 24, opacity: 0 },
   visible: {
     y: 0,
     opacity: 1,
-    transition: {
-      type: 'spring' as const,
-      stiffness: 100
-    }
+    transition: { type: 'spring' as const, stiffness: 120, damping: 14 }
   }
 };
 
@@ -43,9 +34,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    loadDashboard();
-  }, []);
+  useEffect(() => { loadDashboard(); }, []);
 
   const loadDashboard = async () => {
     try {
@@ -60,36 +49,23 @@ export default function DashboardPage() {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    const variants: Record<string, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; label: string }> = {
-      submitted: { variant: 'secondary', label: 'Pending Review' },
-      approved: { variant: 'default', label: 'Approved' },
-      rejected: { variant: 'destructive', label: 'Rejected' },
-    };
-    const config = variants[status] || { variant: 'outline', label: status };
-    return <Badge variant={config.variant}>{config.label}</Badge>;
-  };
-
   const paymentPercent = summary
-    ? Math.round((summary.paidAmount / summary.totalFees) * 100) || 0
+    ? Math.round(((summary.totalFees - (summary.remainingBalance || 0)) / summary.totalFees) * 100) || 0
     : 0;
+
+  const statusConfig: Record<string, { label: string; bg: string; text: string }> = {
+    submitted: { label: 'Pending Review', bg: 'bg-orange-100', text: 'text-orange-700' },
+    approved: { label: 'Approved', bg: 'bg-green-100', text: 'text-green-700' },
+    rejected: { label: 'Rejected', bg: 'bg-red-100', text: 'text-red-700' },
+  };
 
   if (loading) {
     return (
-      <div className="space-y-4 md:space-y-8">
-        <Skeleton className="h-12 w-64 bg-muted" />
-        <div className="grid gap-3 md:gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {[...Array(3)].map((_, i) => (
-            <Card key={i} className="shadow-sm">
-              <CardHeader className="pb-3">
-                <Skeleton className="h-5 w-32 bg-muted" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-10 w-24 bg-muted mb-4" />
-                <Skeleton className="h-4 w-full bg-muted" />
-              </CardContent>
-            </Card>
-          ))}
+      <div className="space-y-6 font-['Plus_Jakarta_Sans']">
+        <Skeleton className="h-14 w-72 rounded-2xl" />
+        <div className="grid grid-cols-12 gap-6">
+          <Skeleton className="col-span-12 lg:col-span-5 h-64 rounded-[40px]" />
+          <Skeleton className="col-span-12 lg:col-span-7 h-64 rounded-[40px]" />
         </div>
       </div>
     );
@@ -97,273 +73,267 @@ export default function DashboardPage() {
 
   if (error) {
     return (
-      <Alert variant="destructive" className="shadow-sm">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>{error}</AlertDescription>
-      </Alert>
+      <div className="p-6 bg-red-50 rounded-[32px] flex items-center gap-4">
+        <AlertCircle className="h-6 w-6 text-red-500 flex-shrink-0" />
+        <p className="font-bold text-red-700">{error}</p>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-4 md:space-y-8">
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+      className="font-['Plus_Jakarta_Sans'] pb-12 space-y-8"
+    >
       {/* Header */}
-      <motion.div 
-        initial={{ opacity: 0, x: -20 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-6"
-      >
+      <motion.div variants={itemVariants} className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl md:text-3xl font-bold tracking-tight text-gray-900 mb-1 md:mb-2">Dashboard</h1>
-          <p className="text-sm md:text-base text-muted-foreground">Welcome back, {profile?.full_name?.split(' ')[0] || 'Parent'}</p>
+          <h1 className="text-4xl md:text-5xl font-black text-slate-900 leading-tight tracking-tight">
+            Good Morning,{' '}
+            <span className="text-blue-600">{profile?.full_name?.split(' ')[0] || 'Parent'}</span> 👋
+          </h1>
+          <p className="text-slate-500 font-medium mt-2 text-lg font-['Be_Vietnam_Pro']">
+            Here's what's happening at AwesomeKids today.
+          </p>
         </div>
-        {summary?.remainingBalance !== 0 && (
-          <Button size="default" asChild className="shadow-md hover:shadow-lg transition-all duration-200 md:text-base">
-            <Link to="/payments">
-              Make Payment
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
-          </Button>
+        {(summary?.remainingBalance ?? 0) > 0 && (
+          <Link
+            to="/payments"
+            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-black text-base px-8 py-4 rounded-[20px] shadow-xl shadow-blue-200 transition-all active:scale-95 self-start"
+          >
+            Pay Now <ArrowRight className="h-5 w-5" />
+          </Link>
         )}
       </motion.div>
 
-      {/* High Priority Announcements */}
-      {summary?.recentAnnouncements && summary.recentAnnouncements.filter(a => a.priority === 'high').length > 0 && (
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="space-y-3"
+      {/* High Priority Alerts */}
+      {summary?.recentAnnouncements?.filter(a => a.priority === 'high').map((ann) => (
+        <motion.div
+          key={ann.id}
+          variants={itemVariants}
+          className="bg-gradient-to-r from-rose-50 to-pink-50 rounded-[32px] p-6 flex items-start gap-4 border-l-4 border-rose-400"
         >
-          {summary.recentAnnouncements.filter(a => a.priority === 'high').map((announcement) => (
-            <motion.div
-              key={announcement.id}
-              initial={{ x: -20, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              whileHover={{ x: 5 }}
-            >
-              <Alert className="border-l-4 border-l-red-500 bg-red-50 border-t-0 border-r-0 border-b-0 rounded-none shadow-sm">
-                <AlertCircle className="h-4 w-4 text-red-600" />
-                <AlertDescription className="text-red-900 ml-2">
-                  <span className="font-semibold">{announcement.title}:</span> {announcement.content}
-                </AlertDescription>
-              </Alert>
-            </motion.div>
-          ))}
+          <span className="p-2 bg-rose-100 rounded-xl text-rose-600 flex-shrink-0">
+            <AlertCircle className="w-5 h-5" />
+          </span>
+          <div>
+            <p className="font-black text-rose-900 text-base">{ann.title}</p>
+            <p className="text-rose-700 font-medium text-sm mt-1 font-['Be_Vietnam_Pro'] leading-relaxed">{ann.content}</p>
+          </div>
         </motion.div>
-      )}
+      ))}
 
-      {/* Main Stats Cards */}
-      <motion.div 
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="grid gap-3 md:gap-6 md:grid-cols-2 lg:grid-cols-3"
-      >
-        {/* Payment Status Card */}
-        <motion.div variants={itemVariants} whileHover={{ y: -5 }}>
-          <Card className="border-t-4 border-t-primary shadow-sm hover:shadow-md transition-all duration-200 h-full">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base md:text-lg font-semibold flex items-center gap-2">
-                <div className="p-1.5 md:p-2 bg-primary/10 rounded-lg">
-                  <DollarSign className="h-4 w-4 md:h-5 md:w-5 text-primary" />
-                </div>
-                Fee Payment Status
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 md:space-y-5">
-              <div className="flex justify-between items-baseline">
-                <span className="text-xs md:text-sm font-medium text-muted-foreground">Balance Due</span>
-                <span className="text-2xl md:text-3xl font-bold text-orange-600">₹{summary?.remainingBalance.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
+      {/* Main Bento Grid */}
+      <div className="grid grid-cols-12 gap-6">
+
+        {/* Fee Status Card */}
+        <motion.div variants={itemVariants} className="col-span-12 lg:col-span-5">
+          <div className="bg-white rounded-[48px] p-8 md:p-10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.06)] h-full flex flex-col gap-6 relative overflow-hidden group">
+            <div className="absolute -bottom-8 -right-8 w-40 h-40 bg-blue-50 rounded-full blur-3xl opacity-60 group-hover:scale-150 transition-all duration-700" />
+            <div className="relative z-10 flex flex-col h-full">
+              <div className="flex items-center gap-3 mb-6">
+                <span className="p-3 bg-blue-600 rounded-2xl text-white shadow-lg shadow-blue-200">
+                  <DollarSign className="w-5 h-5" />
+                </span>
+                <h2 className="text-2xl font-black text-slate-900">Fees & Payments</h2>
               </div>
 
-              <div className="space-y-2.5">
-                <div className="flex justify-between text-xs font-medium text-muted-foreground">
+              <div className="flex items-end gap-2 mb-4">
+                <span className="text-5xl font-black text-slate-900">
+                  ₹{(summary?.remainingBalance ?? 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                </span>
+                <span className="text-slate-400 font-bold mb-2 font-['Be_Vietnam_Pro']">outstanding</span>
+              </div>
+
+              <div className="space-y-2 mb-6">
+                <div className="flex justify-between text-sm font-bold text-slate-500">
                   <span>Payment Progress</span>
-                  <span className="text-primary">{paymentPercent}% Paid</span>
+                  <span className="text-blue-600">{paymentPercent}% Complete</span>
                 </div>
-                <Progress value={paymentPercent} className="h-2.5" />
+                <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${paymentPercent}%` }}
+                    transition={{ delay: 0.5, duration: 1, ease: 'easeOut' }}
+                    className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"
+                  />
+                </div>
               </div>
 
-              <div className="pt-3 border-t">
-                <div className="flex justify-between items-baseline mb-1">
-                  <p className="text-xs text-muted-foreground">Base Fee</p>
-                  <p className="text-sm font-medium text-gray-700">₹{summary?.totalFees.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
+              <div className="space-y-2 bg-slate-50 rounded-[24px] p-5 mt-auto">
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-500 font-medium">Total Fee</span>
+                  <span className="font-black text-slate-900">₹{(summary?.totalFees ?? 0).toLocaleString('en-IN')}</span>
                 </div>
-                {summary && summary.students.some(s => s.admission?.discount_amount && s.admission.discount_amount > 0) && (
-                  <div className="flex justify-between items-baseline mb-2">
-                    <p className="text-xs text-orange-600 font-medium">Applied Discount</p>
-                    <p className="text-sm font-bold text-orange-600">- ₹{summary.students.reduce((sum, s) => sum + (s.admission?.discount_amount || 0), 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
+                {summary?.students.some(s => (s.admission?.discount_amount ?? 0) > 0) && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-orange-600 font-medium">Discount Applied</span>
+                    <span className="font-black text-orange-600">
+                      - ₹{summary.students.reduce((sum, s) => sum + (s.admission?.discount_amount ?? 0), 0).toLocaleString('en-IN')}
+                    </span>
                   </div>
                 )}
-                <div className="flex justify-between items-baseline pt-1 border-t border-dashed">
-                  <p className="text-xs font-semibold text-gray-900">Total Payable</p>
-                  <p className="text-lg font-bold text-gray-900">₹{summary?.totalFees.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
-                </div>
               </div>
 
-              <Link to="/payments" className="inline-flex items-center text-sm font-medium text-primary hover:underline hover:text-primary/80 transition-colors">
-                View Payment History <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+              <Link
+                to="/payments"
+                className="inline-flex items-center gap-2 text-blue-600 font-black text-sm mt-5 hover:underline"
+              >
+                View Payment History <ArrowRight className="w-4 h-4" />
               </Link>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </motion.div>
 
-        {/* Child Status Card */}
-        <motion.div variants={itemVariants} whileHover={{ y: -5 }}>
-          <Card className="border-t-4 border-t-green-500 shadow-sm hover:shadow-md transition-all duration-200 h-full">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base md:text-lg font-semibold flex items-center gap-2">
-                <div className="p-1.5 md:p-2 bg-green-100 rounded-lg">
-                  <Users className="h-4 w-4 md:h-5 md:w-5 text-green-600" />
-                </div>
-                Your Child
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {summary?.students.length === 0 ? (
-                <div className="text-center py-6">
-                  <p className="text-sm text-muted-foreground mb-4">No admission submitted yet.</p>
-                  <Button asChild variant="outline" size="sm" className="shadow-sm">
-                    <Link to="/admission">Apply Now</Link>
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-5">
-                  {summary?.students.map((student) => {
-                    const stdValue = (student.class || '').toLowerCase();
-                    const styles = STANDARD_STYLES[stdValue];
-                    const iconMap: Record<string, any> = { Baby, Flower2, Palette, BookOpen, GraduationCap };
-                    const IconComponent = iconMap[styles?.icon || 'GraduationCap'] || GraduationCap;
+        {/* Right Column: Child Card + Events */}
+        <div className="col-span-12 lg:col-span-7 flex flex-col gap-6">
 
-                    return (
-                      <div key={student.id} className={cn("p-4 rounded-xl border-2 transition-all hover:shadow-md bg-white", styles?.borderColor || "border-muted")}>
-                        <div className="flex justify-between items-start gap-3">
-                          <div className="flex items-center gap-3">
-                            <div className={cn("p-2 rounded-lg text-white shadow-sm bg-gradient-to-br", styles?.gradient || "from-primary to-primary/80")}>
-                              <IconComponent className="h-5 w-5" />
-                            </div>
-                            <div className="flex-1">
-                              <p className="font-bold text-lg text-gray-900 leading-tight">{student.full_name}</p>
-                              <div className="flex items-center gap-2 mt-1">
-                                <Badge variant="outline" className={cn("text-[10px] font-bold uppercase tracking-wider border-none", styles?.bgColor || "bg-muted", styles?.color || "text-muted-foreground")}>
-                                  {student.class}
-                                </Badge>
-                                <span className="text-xs text-muted-foreground">• {student.academic_year}</span>
-                              </div>
-                            </div>
+          {/* Child Status Card */}
+          <motion.div variants={itemVariants}>
+            <div className="bg-slate-50 rounded-[48px] p-8 md:p-10 relative overflow-hidden group">
+              <div className="absolute -top-10 -right-10 w-40 h-40 bg-green-50 rounded-full blur-3xl opacity-80 group-hover:scale-150 transition-all duration-700" />
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-6">
+                  <span className="p-3 bg-white rounded-2xl text-green-600 shadow-sm">
+                    <GraduationCap className="w-5 h-5" />
+                  </span>
+                  <h2 className="text-2xl font-black text-slate-900">Your Child</h2>
+                </div>
+
+                {!summary?.students?.length ? (
+                  <div className="text-center py-8">
+                    <p className="text-slate-400 font-medium font-['Be_Vietnam_Pro']">No admission submitted yet.</p>
+                    <Link to="/admission" className="inline-flex mt-4 items-center gap-2 bg-blue-600 text-white font-black text-sm px-6 py-3 rounded-2xl shadow-lg shadow-blue-100 hover:bg-blue-500 transition-all">
+                      Apply Now <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {summary.students.map((student) => {
+                      const stdValue = (student.class || '').toLowerCase();
+                      const styles = STANDARD_STYLES[stdValue];
+                      const iconMap: Record<string, any> = { Baby, Flower2, Palette, BookOpen, GraduationCap };
+                      const IconComponent = iconMap[styles?.icon || 'GraduationCap'] || GraduationCap;
+                      const sc = statusConfig[student.admission?.status ?? ''] || { label: student.admission?.status || 'Unknown', bg: 'bg-slate-100', text: 'text-slate-600' };
+
+                      return (
+                        <div key={student.id} className="bg-white rounded-[32px] p-6 flex items-center gap-4">
+                          <div className={cn("p-3 rounded-2xl text-white shadow-md bg-gradient-to-br flex-shrink-0", styles?.gradient || "from-blue-500 to-blue-600")}>
+                            <IconComponent className="w-6 h-6" />
                           </div>
-                          {student.admission && (
-                            <div className="flex flex-col items-end gap-2">
-                              {getStatusBadge(student.admission.status)}
-                            </div>
-                          )}
-                        </div>
-                        {student.batch_time && (
-                          <div className="mt-3 pt-3 border-t border-dashed flex items-center justify-between">
-                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                              <Clock className="h-3 w-3" />
-                              <span>{student.batch_time}</span>
-                            </div>
-                            {student.admission?.discount_amount && student.admission.discount_amount > 0 && (
-                              <Badge variant="outline" className="text-[10px] bg-orange-50 text-orange-700 border-orange-200">
-                                Discount Applied
-                              </Badge>
+                          <div className="flex-1">
+                            <p className="font-black text-xl text-slate-900">{student.full_name}</p>
+                            <p className="text-slate-500 text-sm font-medium font-['Be_Vietnam_Pro']">{student.class} • {student.academic_year}</p>
+                            {student.batch_time && (
+                              <p className="flex items-center gap-1.5 text-xs text-slate-400 font-bold mt-1 uppercase tracking-wide">
+                                <Clock className="w-3 h-3" /> {student.batch_time}
+                              </p>
                             )}
                           </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                  <div className="pt-4 border-t">
-                    <Link to="/admission" className="inline-flex items-center text-sm font-medium text-primary hover:underline hover:text-primary/80 transition-colors">
-                      View Admission Details <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                          <span className={cn("px-4 py-2 rounded-full text-xs font-black uppercase tracking-wider flex-shrink-0", sc.bg, sc.text)}>
+                            {sc.label}
+                          </span>
+                        </div>
+                      );
+                    })}
+                    <Link to="/admission" className="inline-flex items-center gap-2 text-blue-600 font-black text-sm hover:underline">
+                      View Admission Details <ArrowRight className="w-4 h-4" />
                     </Link>
                   </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
+                )}
+              </div>
+            </div>
+          </motion.div>
 
-        {/* Upcoming Events Card */}
-        <motion.div variants={itemVariants} whileHover={{ y: -5 }}>
-          <Card className="border-t-4 border-t-blue-500 shadow-sm hover:shadow-md transition-all duration-200 h-full">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base md:text-lg font-semibold flex items-center gap-2">
-                <div className="p-1.5 md:p-2 bg-blue-100 rounded-lg">
-                  <Calendar className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />
-                </div>
-                Next Event
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {summary?.upcomingEvents.length === 0 ? (
-                <div className="py-6 text-center">
-                  <p className="text-sm text-muted-foreground">No upcoming events.</p>
-                </div>
-              ) : (
-                <div className="space-y-5">
-                  {summary?.upcomingEvents.slice(0, 1).map((event) => (
-                    <div key={event.id}>
-                      <p className="font-semibold text-base text-gray-900 mb-2">{event.title}</p>
-                      <div className="flex items-center text-sm text-muted-foreground gap-2">
-                        <Clock className="h-3.5 w-3.5" />
-                        {format(new Date(event.event_date), 'MMMM d, yyyy')}
-                      </div>
-                    </div>
-                  ))}
-                  <div className="pt-4 border-t">
-                    <Link to="/events" className="inline-flex items-center text-sm font-medium text-primary hover:underline hover:text-primary/80 transition-colors">
-                      View All Events <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
-      </motion.div>
-
-      {/* Recent Announcements Section */}
-      {summary?.recentAnnouncements && summary.recentAnnouncements.filter(a => a.priority !== 'high').length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-        >
-          <Card className="shadow-sm">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-base md:text-xl font-semibold">Recent Announcements</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {summary.recentAnnouncements.filter(a => a.priority !== 'high').slice(0, 3).map((announcement, idx) => (
-                  <motion.div 
-                    key={announcement.id} 
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.5 + idx * 0.1 }}
-                    className="flex gap-4 items-start pb-4 border-b last:border-0 last:pb-0"
-                  >
-                    <div className="bg-slate-100 p-2.5 rounded-full shrink-0 hidden sm:block">
-                      <Bell className="h-4 w-4 text-slate-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-sm text-gray-900 mb-1">{announcement.title}</h4>
-                      <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">{announcement.content}</p>
-                      <p className="text-xs text-muted-foreground mt-2">{format(new Date(announcement.announcement_date), 'MMM d, yyyy')}</p>
-                    </div>
-                  </motion.div>
-                ))}
-                <div className="pt-2">
-                  <Button variant="link" asChild className="px-0 h-auto font-medium">
-                    <Link to="/announcements">Read All Announcements</Link>
-                  </Button>
+          {/* Quick Actions Row: Events & Announcements */}
+          <div className="grid grid-cols-2 gap-6">
+            <motion.div variants={itemVariants}>
+              <div className="bg-[#fffbf0] rounded-[40px] p-6 h-full relative overflow-hidden group">
+                <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-orange-50 rounded-full blur-2xl group-hover:scale-125 transition-all duration-500" />
+                <div className="relative z-10">
+                  <span className="p-3 bg-white rounded-2xl text-orange-500 shadow-sm inline-block mb-4">
+                    <Calendar className="w-5 h-5" />
+                  </span>
+                  <h3 className="font-black text-slate-900 text-lg mb-1">Upcoming Events</h3>
+                  {summary?.upcomingEvents?.length ? (
+                    <>
+                      <p className="font-bold text-slate-700 font-['Be_Vietnam_Pro'] text-sm leading-snug line-clamp-2">
+                        {summary.upcomingEvents[0].title}
+                      </p>
+                      <p className="text-xs text-slate-400 font-bold mt-1 uppercase tracking-wide">
+                        {format(new Date(summary.upcomingEvents[0].event_date), 'MMM d, yyyy')}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-slate-400 text-sm font-medium font-['Be_Vietnam_Pro']">No upcoming events.</p>
+                  )}
+                  <Link to="/events" className="inline-flex mt-4 items-center gap-1 text-orange-600 font-black text-xs hover:underline">
+                    View All <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </motion.div>
+
+            <motion.div variants={itemVariants}>
+              <div className="bg-[#f0f4ff] rounded-[40px] p-6 h-full relative overflow-hidden group">
+                <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-blue-100 rounded-full blur-2xl group-hover:scale-125 transition-all duration-500" />
+                <div className="relative z-10">
+                  <span className="p-3 bg-white rounded-2xl text-blue-600 shadow-sm inline-block mb-4">
+                    <Bell className="w-5 h-5" />
+                  </span>
+                  <h3 className="font-black text-slate-900 text-lg mb-1">Announcements</h3>
+                  {summary?.recentAnnouncements?.filter(a => a.priority !== 'high').length ? (
+                    <p className="font-bold text-slate-700 font-['Be_Vietnam_Pro'] text-sm leading-snug line-clamp-2">
+                      {summary.recentAnnouncements.filter(a => a.priority !== 'high')[0].title}
+                    </p>
+                  ) : (
+                    <p className="text-slate-400 text-sm font-medium font-['Be_Vietnam_Pro']">No new announcements.</p>
+                  )}
+                  <Link to="/announcements" className="inline-flex mt-4 items-center gap-1 text-blue-600 font-black text-xs hover:underline">
+                    View All <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* Recent Announcements Feed */}
+      {summary?.recentAnnouncements?.filter(a => a.priority !== 'high').length ? (
+        <motion.div variants={itemVariants} className="bg-slate-50 rounded-[48px] p-8 md:p-10">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <span className="p-3 bg-white rounded-2xl text-slate-400 shadow-sm">
+                <Bell className="w-5 h-5" />
+              </span>
+              <h2 className="text-2xl font-black text-slate-900">Recent Announcements</h2>
+            </div>
+            <Link to="/announcements" className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 bg-white px-4 py-2 rounded-full shadow-sm hover:text-blue-600 transition-colors">
+              View All
+            </Link>
+          </div>
+          <div className="space-y-4">
+            {summary.recentAnnouncements.filter(a => a.priority !== 'high').slice(0, 3).map((ann) => (
+              <div key={ann.id} className="bg-white rounded-[32px] p-6 flex gap-4 hover:shadow-md transition-all">
+                <div className="p-2.5 bg-blue-50 rounded-xl flex-shrink-0">
+                  <Bell className="w-4 h-4 text-blue-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-black text-slate-900">{ann.title}</p>
+                  <p className="text-slate-500 text-sm font-medium font-['Be_Vietnam_Pro'] mt-1 line-clamp-2">{ann.content}</p>
+                  <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mt-2">
+                    {format(new Date(ann.announcement_date), 'MMM d, yyyy')}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
         </motion.div>
-      )}
-    </div>
+      ) : null}
+    </motion.div>
   );
 }
