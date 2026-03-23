@@ -10,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { format } from 'date-fns';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { STANDARD_STYLES } from '@/lib/batchConfig';
 import { Baby, Flower2, Palette, BookOpen, GraduationCap, Users, DollarSign, Calendar, Bell, ArrowRight, Clock, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';

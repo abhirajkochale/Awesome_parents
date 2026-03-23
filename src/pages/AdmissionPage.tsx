@@ -26,7 +26,7 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { Upload, CheckCircle, ChevronRight, ChevronLeft, FileText, User, Users, ClipboardCheck } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { BrandLoader } from '@/components/common/BrandLoader';
 
 // Fee structure

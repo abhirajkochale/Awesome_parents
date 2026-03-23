@@ -21,7 +21,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, Send, MessageSquare, ClipboardList, Paperclip, CornerDownRight, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { EmptyState } from '@/components/common/EmptyState';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -86,7 +86,7 @@ export default function SupportPage() {
     const onSubmit = async (data: QueryFormValues) => {
         setSubmitting(true);
         try {
-            let attachmentUrl = undefined;
+            let attachmentUrl: string | undefined = undefined;
             if (attachment) {
                 attachmentUrl = await queryApi.uploadQueryAttachment(attachment);
             }

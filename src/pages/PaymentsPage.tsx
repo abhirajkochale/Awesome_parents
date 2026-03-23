@@ -40,7 +40,7 @@ import { format } from 'date-fns';
 import { DollarSign, Upload, CheckCircle, Clock, AlertCircle, Calendar, Loader2, FileText } from 'lucide-react';
 import { EmptyState } from '@/components/common/EmptyState';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 
 const containerVariants = {
   hidden: { opacity: 0 },

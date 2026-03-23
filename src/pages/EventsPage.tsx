@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { EmptyState } from '@/components/common/EmptyState';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'motion/react';
 
 const containerVariants = {
   hidden: { opacity: 0 },
