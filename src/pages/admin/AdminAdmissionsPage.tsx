@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { admissionApi, batchApi } from '@/db/api';
 import type { AdmissionWithStudent } from '@/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -29,6 +28,17 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { exportStudentRegister } from '@/lib/exportStudentRegister';
+import { motion } from 'motion/react';
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+};
+
+const itemVariants = {
+  hidden: { y: 24, opacity: 0 },
+  visible: { y: 0, opacity: 1, transition: { type: 'spring' as const, stiffness: 120, damping: 14 } }
+};
 
 export default function AdminAdmissionsPage() {
   const [admissions, setAdmissions] = useState<AdmissionWithStudent[]>([]);
@@ -76,7 +86,6 @@ export default function AdminAdmissionsPage() {
         status === 'approved' ? finalFee : undefined
       );
 
-      // If approving and a batch was selected, assign it
       if (status === 'approved' && selectedBatch && selectedAdmission?.student) {
         const batches = getBatchesForStandard(selectedAdmission.student.class);
         const batch = batches.find(b => b.batchId === selectedBatch);
@@ -90,10 +99,7 @@ export default function AdminAdmissionsPage() {
         }
       }
 
-      toast({
-        title: 'Success',
-        description: `Admission ${status} successfully`,
-      });
+      toast({ title: 'Success', description: `Admission ${status} successfully` });
       setSelectedAdmission(null);
       setNotes('');
       setSelectedBatch('');
@@ -101,11 +107,7 @@ export default function AdminAdmissionsPage() {
       loadAdmissions();
     } catch (err) {
       console.error(err);
-      toast({
-        title: 'Error',
-        description: 'Failed to update admission status',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: 'Failed to update admission status', variant: 'destructive' });
     } finally {
       setIsProcessing(false);
     }
@@ -132,25 +134,16 @@ export default function AdminAdmissionsPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this admission? This action cannot be undone.')) {
-      return;
-    }
+    if (!window.confirm('Are you sure you want to delete this admission? This action cannot be undone.')) return;
 
     try {
       setIsProcessing(true);
       await admissionApi.deleteAdmission(id);
-      toast({
-        title: 'Success',
-        description: 'Admission deleted successfully',
-      });
+      toast({ title: 'Success', description: 'Admission deleted successfully' });
       loadAdmissions();
     } catch (err) {
       console.error(err);
-      toast({
-        title: 'Error',
-        description: 'Failed to delete admission',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: 'Failed to delete admission', variant: 'destructive' });
     } finally {
       setIsProcessing(false);
     }
@@ -170,50 +163,61 @@ export default function AdminAdmissionsPage() {
   };
 
   if (loading) {
-    return <Skeleton className="h-96 bg-muted" />;
+    return (
+      <div className="space-y-6 font-['Plus_Jakarta_Sans']">
+        <Skeleton className="h-14 w-72 rounded-2xl" />
+        <Skeleton className="h-12 w-full max-w-md rounded-2xl" />
+        <div className="space-y-4">
+          <Skeleton className="h-40 w-full rounded-[32px]" />
+          <Skeleton className="h-40 w-full rounded-[32px]" />
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+      className="font-['Plus_Jakarta_Sans'] pb-12 space-y-8"
+    >
+      <motion.div variants={itemVariants} className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl md:text-3xl font-bold">Manage Admissions</h1>
-          <p className="text-muted-foreground">Review and approve admission applications</p>
+          <h1 className="text-4xl md:text-5xl font-black text-slate-900 leading-tight tracking-tight">
+            Manage <span className="text-blue-600">Admissions</span> 📝
+          </h1>
+          <p className="text-slate-500 font-medium mt-2 text-lg font-['Be_Vietnam_Pro']">
+            Review and approve student applications
+          </p>
         </div>
         <Button
           onClick={handleExportExcel}
           disabled={isExporting}
-          variant="outline"
-          className="gap-2"
+          className="bg-blue-600 hover:bg-blue-500 text-white font-black text-sm px-6 py-6 rounded-2xl shadow-xl shadow-blue-200 transition-all active:scale-95 self-start"
         >
-          {isExporting ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Download className="h-4 w-4" />
-          )}
+          {isExporting ? <Loader2 className="h-5 w-5 mr-2 animate-spin" /> : <Download className="h-5 w-5 mr-2" />}
           {isExporting ? 'Exporting...' : 'Download Excel'}
         </Button>
-      </div>
+      </motion.div>
 
-      {/* Search Bar */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+      <motion.div variants={itemVariants} className="relative max-w-md">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
         <Input
           placeholder="Search by student name, class, or status..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="pl-9"
+          className="pl-12 h-14 bg-white border-none rounded-2xl shadow-md font-medium text-base text-slate-900 placeholder:text-slate-400"
         />
-      </div>
+      </motion.div>
 
       {admissions.length === 0 ? (
-        <Card>
-          <CardContent className="py-8">
-            <p className="text-center text-muted-foreground">No admissions found</p>
-          </CardContent>
-        </Card>
+        <motion.div variants={itemVariants} className="bg-white rounded-[48px] p-12 text-center shadow-sm">
+          <p className="text-slate-400 font-medium font-['Be_Vietnam_Pro'] text-lg">No admissions found</p>
+        </motion.div>
       ) : (
-        STANDARDS.map((std) => {
+        <div className="space-y-8">
+        {STANDARDS.map((std) => {
           const label = STANDARD_LABELS[std] || std;
           const styles = STANDARD_STYLES[std];
           const iconMap: Record<string, any> = { Baby, Flower2, Palette, BookOpen, GraduationCap };
@@ -229,185 +233,162 @@ export default function AdminAdmissionsPage() {
             return name.includes(query) || cls.includes(query) || status.includes(query);
           });
 
+          if (filtered.length === 0) return null;
+
           return (
-            <Card key={std} className={cn("overflow-hidden border-2", styles?.borderColor || "border-muted")}>
-              <div className={cn("h-1.5 w-full bg-gradient-to-r", styles?.gradient || "from-muted to-muted-foreground")} />
-              <CardHeader className={cn("pb-3", styles?.bgColor || "bg-muted/10")}>
-                <CardTitle className="text-base md:text-lg flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className={cn("p-1.5 rounded-lg", styles?.accent || "bg-primary")}>
-                      <IconComponent className="h-4 w-4 text-white" />
+            <motion.div variants={itemVariants} key={std} className="bg-white rounded-[48px] overflow-hidden shadow-[0_16px_32px_-12px_rgba(0,0,0,0.05)] border border-slate-100">
+              <div className={cn("h-3 w-full bg-gradient-to-r", styles?.gradient || "from-slate-200 to-slate-300")} />
+              
+              <div className="p-8">
+                <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+                  <div className="flex items-center gap-4">
+                    <div className={cn("p-4 rounded-2xl bg-gradient-to-br text-white shadow-lg", styles?.gradient || "from-slate-500 to-slate-600")}>
+                      <IconComponent className="h-6 w-6" />
                     </div>
-                    <span className={cn("font-bold tracking-tight", styles?.color || "text-foreground")}>{label}</span>
-                  </div>
-                  <Badge variant="secondary" className={cn("text-xs font-medium border-none", styles?.bgColor || "bg-white")}>
-                    {filtered.length} admission{filtered.length !== 1 ? 's' : ''}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-4">
-                {filtered.length === 0 ? (
-                  <p className="text-center text-muted-foreground text-sm py-8 italic border-2 border-dashed rounded-xl">No pending admissions for {label}</p>
-                ) : (
-                  <div className="space-y-4">
-                    {filtered.map((admission) => (
-                <div key={admission.id} className={cn("p-4 border-2 rounded-xl space-y-3 transition-all hover:shadow-md bg-white", styles?.borderColor || "border-muted")}>
-                  <div className="flex items-start justify-between">
                     <div>
-                      <h3 className="font-semibold text-lg">{admission.student?.full_name}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Class: {admission.student?.class} • Year: {admission.student?.academic_year}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Submitted: {format(new Date(admission.created_at), 'MMM d, yyyy')}
+                      <h2 className="text-2xl font-black text-slate-900">{label}</h2>
+                      <p className="text-slate-500 font-medium font-['Be_Vietnam_Pro']">
+                        {filtered.length} application{filtered.length !== 1 ? 's' : ''}
                       </p>
                     </div>
-                    <Badge
-                      variant={
-                        admission.status === 'approved'
-                          ? 'default'
-                          : admission.status === 'rejected'
-                            ? 'destructive'
-                            : 'secondary'
-                      }
-                    >
-                      {admission.status}
-                    </Badge>
-                  </div>
-
-                  {/* Show current batch for approved students */}
-                  {admission.status === 'approved' && admission.student?.batch_id && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                      <span className="text-muted-foreground">Batch:</span>
-                      <Badge variant="outline" className="font-normal">
-                        {admission.student.batch_label || admission.student.batch_time}
-                      </Badge>
-                    </div>
-                  )}
-
-                  <div className="grid md:grid-cols-2 gap-2 text-sm">
-                    <div>
-                      <span className="text-muted-foreground">DOB:</span>{' '}
-                      {format(new Date(admission.student?.date_of_birth || ''), 'MMM d, yyyy')}
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Gender:</span>{' '}
-                      {admission.student?.gender}
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Emergency Contact:</span>{' '}
-                      {admission.student?.emergency_contact_name}
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Total Fee:</span> ₹
-                      {Number(admission.total_fee).toFixed(2)}
-                    </div>
-                    {admission.status === 'approved' && admission.discount_amount && admission.discount_amount > 0 && (
-                      <div className="md:col-span-2 flex flex-col gap-1 p-2 bg-orange-50 border border-orange-100 rounded">
-                        <div className="flex justify-between text-xs text-orange-700">
-                          <span>Base Fee: ₹{Number(admission.total_fee).toLocaleString()}</span>
-                          <span className="font-bold">- Discount: ₹{Number(admission.discount_amount).toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between text-sm font-bold text-orange-800">
-                          <span>Final Payable Amount:</span>
-                          <span>₹{Number(admission.final_fee).toLocaleString()}</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {admission.notes && (
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">Notes:</span> {admission.notes}
-                    </div>
-                  )}
-
-                  <div className="flex gap-2 flex-wrap">
-                    {admission.status === 'submitted' && (
-                      <>
-                        <Button
-                          size="sm"
-                          onClick={() => setSelectedAdmission(admission)}
-                          className="gap-2"
-                        >
-                          <CheckCircle className="h-4 w-4" />
-                          Approve
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => {
-                            setSelectedAdmission(admission);
-                            setNotes('');
-                          }}
-                          className="gap-2"
-                        >
-                          <XCircle className="h-4 w-4" />
-                          Reject
-                        </Button>
-                      </>
-                    )}
-                    {/* Reassign batch for approved students */}
-                    {admission.status === 'approved' && (() => {
-                      const batches = getBatchesForStandard(admission.student?.class || '');
-                      return batches.length > 0 ? (
-                        <Select
-                          value={admission.student?.batch_id || ''}
-                          onValueChange={(val) => handleReassignBatch(admission.student!.id, val)}
-                          disabled={isProcessing}
-                        >
-                          <SelectTrigger className="w-[180px] h-8 text-xs">
-                            <SelectValue placeholder="Assign Batch" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {batches.map((b) => (
-                              <SelectItem key={b.batchId} value={b.batchId}>
-                                {b.batchTime}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      ) : null;
-                    })()}
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => setSelectedAdmissionForDetails(admission)}
-                      className="gap-2"
-                    >
-                      <Eye className="h-4 w-4" />
-                      View Full Details
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => setSelectedAdmissionForEdit(admission)}
-                      className="gap-2"
-                    >
-                      <Edit className="h-4 w-4" />
-                      Edit
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => handleDelete(admission.id)}
-                      className="gap-2"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      Delete
-                    </Button>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+
+                <div className="grid gap-4">
+                  {filtered.map((admission) => (
+                    <div key={admission.id} className="bg-slate-50 rounded-[32px] p-6 flex flex-col xl:flex-row gap-6 hover:shadow-md transition-all border border-slate-100/50">
+                      
+                      {/* Left: Info */}
+                      <div className="flex-[2] space-y-4">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="font-black text-xl text-slate-900">{admission.student?.full_name}</h3>
+                            <p className="text-sm text-slate-500 font-medium font-['Be_Vietnam_Pro'] mt-1">
+                              Class: {admission.student?.class} • Year: {admission.student?.academic_year}
+                            </p>
+                          </div>
+                          <Badge
+                            variant={
+                              admission.status === 'approved' ? 'default' :
+                              admission.status === 'rejected' ? 'destructive' : 'secondary'
+                            }
+                            className="px-4 py-1.5 rounded-xl uppercase tracking-wider text-xs font-bold shadow-sm"
+                          >
+                            {admission.status}
+                          </Badge>
+                        </div>
+
+                        {admission.status === 'approved' && admission.student?.batch_id && (
+                          <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-slate-100 w-fit">
+                            <Clock className="h-4 w-4 text-blue-500" />
+                            <span className="text-sm font-bold text-slate-700">Batch:</span>
+                            <span className="text-sm font-medium text-slate-500 font-['Be_Vietnam_Pro']">
+                              {admission.student.batch_label || admission.student.batch_time}
+                            </span>
+                          </div>
+                        )}
+
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 bg-white p-4 rounded-2xl border border-slate-100">
+                          <div>
+                            <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">DOB</span>
+                            <span className="text-sm font-medium text-slate-700 font-['Be_Vietnam_Pro']">
+                              {format(new Date(admission.student?.date_of_birth || ''), 'MMM d, yy')}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Gender</span>
+                            <span className="text-sm font-medium text-slate-700 font-['Be_Vietnam_Pro']">
+                              {admission.student?.gender}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Fee</span>
+                            <span className="text-sm font-black text-slate-900 font-['Be_Vietnam_Pro']">
+                              ₹{Number(admission.total_fee).toLocaleString()}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Date</span>
+                            <span className="text-sm font-medium text-slate-700 font-['Be_Vietnam_Pro']">
+                              {format(new Date(admission.created_at), 'MMM d, yy')}
+                            </span>
+                          </div>
+                        </div>
+
+                        {admission.status === 'approved' && admission.discount_amount && admission.discount_amount > 0 && (
+                          <div className="flex justify-between items-center p-4 bg-orange-50 border border-orange-100 rounded-2xl">
+                            <span className="text-sm font-bold text-orange-800">Final Payable (after ₹{Number(admission.discount_amount).toLocaleString()} discount)</span>
+                            <span className="text-lg font-black text-orange-600">₹{Number(admission.final_fee).toLocaleString()}</span>
+                          </div>
+                        )}
+
+                        {admission.notes && (
+                          <div className="bg-amber-50 rounded-2xl p-4 border border-amber-100">
+                            <span className="block text-xs font-bold text-amber-800 uppercase tracking-wider mb-1">Notes</span>
+                            <span className="text-sm font-medium text-amber-900 font-['Be_Vietnam_Pro']">{admission.notes}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Right: Actions */}
+                      <div className="flex-1 flex flex-row flex-wrap xl:flex-col gap-3 justify-end xl:justify-center border-t xl:border-t-0 xl:border-l border-slate-200 pt-4 xl:pt-0 xl:pl-6">
+                        {admission.status === 'submitted' && (
+                          <>
+                            <Button onClick={() => setSelectedAdmission(admission)} className="w-full sm:w-auto xl:w-full bg-green-500 hover:bg-green-600 text-white font-bold rounded-xl h-11 shadow-md">
+                              <CheckCircle className="h-4 w-4 mr-2" /> Approve
+                            </Button>
+                            <Button onClick={() => { setSelectedAdmission(admission); setNotes(''); }} variant="destructive" className="w-full sm:w-auto xl:w-full font-bold rounded-xl h-11 shadow-md">
+                              <XCircle className="h-4 w-4 mr-2" /> Reject
+                            </Button>
+                          </>
+                        )}
+                        
+                        {admission.status === 'approved' && (() => {
+                          const batches = getBatchesForStandard(admission.student?.class || '');
+                          return batches.length > 0 ? (
+                            <Select
+                              value={admission.student?.batch_id || ''}
+                              onValueChange={(val) => handleReassignBatch(admission.student!.id, val)}
+                              disabled={isProcessing}
+                            >
+                              <SelectTrigger className="w-full h-11 bg-white rounded-xl border-slate-200 font-medium text-sm">
+                                <SelectValue placeholder="Assign Batch" />
+                              </SelectTrigger>
+                              <SelectContent className="rounded-2xl border-none shadow-xl">
+                                {batches.map((b) => (
+                                  <SelectItem key={b.batchId} value={b.batchId} className="rounded-xl font-medium">
+                                    {b.batchTime} — {b.batchLabel}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : null;
+                        })()}
+
+                        <div className="flex gap-2 w-full">
+                          <Button onClick={() => setSelectedAdmissionForDetails(admission)} variant="outline" className="flex-1 h-11 bg-white border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-slate-100">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button onClick={() => setSelectedAdmissionForEdit(admission)} variant="outline" className="flex-1 h-11 bg-white border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-slate-100">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button onClick={() => handleDelete(admission.id)} variant="outline" className="flex-1 h-11 bg-white border-red-200 text-red-600 rounded-xl font-bold hover:bg-red-50 hover:text-red-700">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
           );
-        })
+        })}
+        </div>
       )}
 
+      {/* Dialogs */}
       <AdmissionDetailsDialog
         admission={selectedAdmissionForDetails}
         open={!!selectedAdmissionForDetails}
@@ -422,33 +403,32 @@ export default function AdminAdmissionsPage() {
       />
 
       <Dialog open={!!selectedAdmission} onOpenChange={() => { setSelectedAdmission(null); setSelectedBatch(''); }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Update Admission Status</DialogTitle>
-            <DialogDescription>
-              {selectedAdmission?.student?.full_name} - {selectedAdmission?.student?.class}
+        <DialogContent className="rounded-[32px] sm:max-w-md p-8 border-none shadow-2xl font-['Plus_Jakarta_Sans']">
+          <DialogHeader className="mb-6">
+            <DialogTitle className="text-2xl font-black text-slate-900">Update Status</DialogTitle>
+            <DialogDescription className="text-slate-500 font-medium font-['Be_Vietnam_Pro']">
+              {selectedAdmission?.student?.full_name} • {selectedAdmission?.student?.class}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div>
-              <label className="text-sm font-medium">Notes (Optional)</label>
+              <label className="text-sm font-bold text-slate-700 mb-2 block">Notes (Optional)</label>
               <Textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Add any notes or comments"
-                className="mt-2"
+                placeholder="Add any internal notes..."
+                className="rounded-2xl border-slate-200 bg-slate-50 font-medium placeholder:text-slate-400"
               />
             </div>
 
-            {/* Discount and Fee Summary — only shown for approval */}
-            <div className="bg-muted/30 p-4 rounded-lg space-y-4">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Base Admission Fee:</span>
-                <span className="font-semibold">₹{Number(selectedAdmission?.total_fee || 0).toLocaleString()}</span>
+            <div className="bg-blue-50/50 p-6 rounded-[24px] space-y-4 border border-blue-100/50">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-blue-900 font-bold">Base Fee</span>
+                <span className="font-black text-blue-900">₹{Number(selectedAdmission?.total_fee || 0).toLocaleString()}</span>
               </div>
               
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Apply Discount (₹)</label>
+              <div className="space-y-2 pt-2 border-t border-blue-100">
+                <label className="text-sm font-bold text-blue-900 block">Apply Discount (₹)</label>
                 <Input
                   type="number"
                   value={discountAmount}
@@ -456,33 +436,31 @@ export default function AdminAdmissionsPage() {
                   placeholder="0"
                   min="0"
                   max={selectedAdmission?.total_fee}
+                  className="rounded-xl border-blue-200 bg-white font-bold"
                 />
               </div>
 
-              <div className="flex justify-between items-center pt-2 border-t border-dashed">
-                <span className="text-sm font-bold">Final Payable Amount:</span>
-                <span className="text-lg font-bold text-primary">
+              <div className="flex justify-between items-center pt-4 mt-2 border-t border-dashed border-blue-200">
+                <span className="text-sm font-black text-blue-900">Final Payable:</span>
+                <span className="text-xl font-black text-blue-600">
                   ₹{Math.max(0, (selectedAdmission?.total_fee || 0) - (parseFloat(discountAmount) || 0)).toLocaleString()}
                 </span>
               </div>
             </div>
 
-            {/* Batch Selection — only shown for approval */}
             {(() => {
               const batches = getBatchesForStandard(selectedAdmission?.student?.class || '');
-              if (batches.length === 0) return (
-                <p className="text-xs text-muted-foreground italic">No batch options for this standard.</p>
-              );
+              if (batches.length === 0) return null;
               return (
                 <div>
-                  <label className="text-sm font-medium">Assign Batch (for approval)</label>
+                  <label className="text-sm font-bold text-slate-700 mb-2 block">Assign Batch</label>
                   <Select value={selectedBatch} onValueChange={setSelectedBatch}>
-                    <SelectTrigger className="mt-2">
-                      <SelectValue placeholder="Select a batch" />
+                    <SelectTrigger className="w-full h-12 bg-slate-50 rounded-xl border-slate-200 font-medium">
+                      <SelectValue placeholder="Select a batch..." />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="rounded-2xl border-none shadow-xl">
                       {batches.map((b) => (
-                        <SelectItem key={b.batchId} value={b.batchId}>
+                        <SelectItem key={b.batchId} value={b.batchId} className="rounded-xl font-medium cursor-pointer py-2">
                           {b.batchTime} — {b.batchLabel}
                         </SelectItem>
                       ))}
@@ -492,28 +470,26 @@ export default function AdminAdmissionsPage() {
               );
             })()}
 
-            <div className="flex gap-2">
+            <div className="flex gap-3 pt-4">
               <Button
                 onClick={() => handleUpdateStatus(selectedAdmission?.id || '', 'approved')}
                 disabled={isProcessing}
-                className="flex-1"
+                className="flex-1 h-12 rounded-xl bg-green-500 hover:bg-green-600 text-white font-black shadow-md shadow-green-200"
               >
-                <CheckCircle className="mr-2 h-4 w-4" />
-                Approve
+                <CheckCircle className="mr-2 h-5 w-5" /> Approve
               </Button>
               <Button
                 variant="destructive"
                 onClick={() => handleUpdateStatus(selectedAdmission?.id || '', 'rejected')}
                 disabled={isProcessing}
-                className="flex-1"
+                className="flex-1 h-12 rounded-xl font-black shadow-md shadow-red-200"
               >
-                <XCircle className="mr-2 h-4 w-4" />
-                Reject
+                <XCircle className="mr-2 h-5 w-5" /> Reject
               </Button>
             </div>
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </motion.div>
   );
 }
